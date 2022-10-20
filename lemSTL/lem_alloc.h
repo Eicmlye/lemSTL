@@ -1,8 +1,12 @@
 // Allocation and deallocation of memory.
+#ifndef LEMSTL_LEM_ALLOC_H_
+#define LEMSTL_LEM_ALLOC_H_
 
 #include <new.h>
 
-template <typename Allocator>
-class Alloc {
-    
-};
+namespace lem {
+    class alloc {
+        
+    };
+}
+#endif
