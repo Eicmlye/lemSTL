@@ -1,0 +1,11 @@
+// 
+#ifndef LEMSTL_VECTOR_
+#define LEMSTL_VECTOR_
+
+#include "lem_algobase.h"
+#include "lem_vector.h"
+#include "lem_bvector.h"
+
+#include "lem_memory"
+
+#endif

@@ -1,5 +1,5 @@
 {
     "files.associations": {
-        "memory": "cpp"
+        "type_traits": "cpp"
     }
 }

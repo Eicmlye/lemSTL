@@ -1,0 +1,9 @@
+// Memory allocation and object struction.
+#ifndef LEMSTL_LEM_MEMORY_
+#define LEMSTL_LEM_MEMORY_
+
+#include "lem_construct.h"
+#include "lem_alloc.h"
+#include "lem_uninitialized.h"
+
+#endif
