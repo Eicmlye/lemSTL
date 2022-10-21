@@ -1,0 +1,6 @@
+#ifndef LEMSTL_LEM_ITERATOR_
+#define LEMSTL_LEM_ITERATOR_
+
+#include "iterator/lem_iterator.h"
+
+#endif

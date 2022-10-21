@@ -1,2 +1,2 @@
-#include "lem_algobase.h"
-#include "lem_algo.h"
+#include "algorithm/lem_algobase.h"
+#include "algorithm/lem_algo.h"

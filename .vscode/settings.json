@@ -1,5 +1,35 @@
 {
     "files.associations": {
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "new.h": "c",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "exception": "cpp",
+        "initializer_list": "cpp",
+        "iosfwd": "cpp",
+        "iterator": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "new": "cpp",
+        "tuple": "cpp",
+        "typeinfo": "cpp",
+        "utility": "cpp",
+        "vector": "cpp",
+        "xmemory": "cpp",
+        "xstddef": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp",
+        "lem_memory": "cpp",
+        "lem_iterator": "cpp",
+        "lem_type_traits": "cpp"
     }
 }
