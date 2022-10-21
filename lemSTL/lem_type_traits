@@ -1,0 +1,137 @@
+#ifndef LEMSTL_LEM_TYPE_TRAITS_
+#define LEMSTL_LEM_TYPE_TRAITS_
+
+namespace lem {
+// condition tags;
+struct __true_tag {};
+struct __false_tag {};
+
+// lem::__type_traits;
+// Every container should specify its own traits;
+template <typename T>
+struct __type_traits {
+  using has_trivial_default_ctor = __false_tag;
+  using has_trivial_copy_ctor = __false_tag;
+  using has_trivial_assignment_oprtr = __false_tag;
+  using has_trivial_dtor = __false_tag;
+  using is_POD_type = __false_tag;
+};
+// partial specilization for native pointers;
+template <typename T>
+struct __type_traits<T*> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+// partial specilization for native const pointers;
+template <typename T>
+struct __type_traits<T const*> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+/* Explicit specializations for c++ native types */
+template <>
+struct __type_traits<char> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<signed char> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<unsigned char> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<short> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<unsigned short> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<int> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<unsigned int> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<long> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<unsigned long> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<float> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<double> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+template <>
+struct __type_traits<long double> {
+  using has_trivial_default_ctor = __true_tag;
+  using has_trivial_copy_ctor = __true_tag;
+  using has_trivial_assignment_oprtr = __true_tag;
+  using has_trivial_dtor = __true_tag;
+  using is_POD_type = __true_tag;
+};
+/* end */
+} // lem
+
+#endif

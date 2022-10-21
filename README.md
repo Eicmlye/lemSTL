@@ -13,3 +13,8 @@
 ### 0.2. 语法规则
 
 - `const` applies to the thing left of it. If there is nothing on the left then it applies to the thing right of it. 
+
+### 0.3. 文件命名
+
+- 对外文件均以无拓展名形式命名. 
+- 函数实现均以 `.h` 头文件命名. 

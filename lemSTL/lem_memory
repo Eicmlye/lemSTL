@@ -2,8 +2,8 @@
 #ifndef LEMSTL_LEM_MEMORY_
 #define LEMSTL_LEM_MEMORY_
 
-#include "lem_construct.h"
-#include "lem_alloc.h"
-#include "lem_uninitialized.h"
+#include "allocator/lem_construct.h"
+#include "allocator/lem_alloc.h"
+#include "allocator/lem_uninitialized.h"
 
 #endif
