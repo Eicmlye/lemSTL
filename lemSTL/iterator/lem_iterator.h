@@ -2,7 +2,7 @@
 #ifndef LEMSTL_LEM_ITERATOR_H_
 #define LEMSTL_LEM_ITERATOR_H_
 
-#include <cstddef> // for std::ptrdiff_t;
+#include <cstddef> // for ::std::ptrdiff_t;
 
 namespace lem {
 // Iterator category tags;
@@ -16,7 +16,7 @@ struct random_access_iterator_tag : bidirectional_iterator_tag {};
 // Every container should specify its own iterator;
 template <typename Category,
           typename T,
-          typename DifferenceType = std::ptrdiff_t,
+          typename DifferenceType = ::std::ptrdiff_t,
           typename PointerType = T*,
           typename ReferenceType = T&
           >

@@ -21,7 +21,7 @@ class vector {
   using difference_type = ptrdiff_t;
   using pointer_type = DataType*;
   using reference_type = DataType&;
-}£»
+};
 } // lem
 
 #endif

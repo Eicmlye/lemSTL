@@ -30,8 +30,8 @@ inline void __destroy_aux(ForwardIterator head, ForwardIterator tail, __false_ta
 template <typename ForwardIterator>
 inline void __destroy_aux(ForwardIterator, ForwardIterator, __true_tag) {}
 // EM NOTE: here we use __destroy_aux() instead of IF condition statements
-// to make sure destroy() is inline and can be determined in compile time. 
-// Less time is used in runtime.
+// to make sure destroy() is inline and can be determined during compile time. 
+// Less time is used runtime.
 template <typename ForwardIterator, typename T>
 inline void __destroy(ForwardIterator head, ForwardIterator tail, T*) {
   using dtor_type_tag = typename __type_traits<T>::has_trivial_dtor;
