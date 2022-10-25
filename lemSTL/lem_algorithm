@@ -1,2 +1,7 @@
+#ifndef LEMSTL_LEM_ALGORITHM_
+#define LEMSTL_LEM_ALGORITHM_
+
 #include "algorithm/lem_algobase.h"
 #include "algorithm/lem_algo.h"
+
+#endif /* LEMSTL_LEM_ALGORITHM_ */

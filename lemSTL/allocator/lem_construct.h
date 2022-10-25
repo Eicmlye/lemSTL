@@ -3,9 +3,9 @@
 #define LEMSTL_LEM_CONSTRUCT_H_
 
 #include <new.h> // enable placement new;
-#include <../lem_type_traits> // for __type_traits;
 
 #include "../iterator/lem_iterator.h" // for iterator_traits;
+#include "../lem_type_traits" // for __type_traits;
 
 namespace lem {
 template <typename AllocedObject, typename InitValue>

@@ -1,0 +1,6 @@
+#ifndef LEMSTL_LEM_ALGORITHM_H_
+#define LEMSTL_LEM_ALGORITHM_H_
+
+
+
+#endif /* LEMSTL_LEM_ALGORITHM_H_ */
