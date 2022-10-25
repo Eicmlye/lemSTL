@@ -4,7 +4,7 @@
 
 #include <cstddef> // for ptrdiff_t;
 
-#include "lem_memory"
+#include "../lem_memory"
 #include "../lem_iterator"
 
 namespace lem {
