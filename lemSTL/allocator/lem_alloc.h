@@ -424,7 +424,7 @@ void* __default_alloc_template<threads, inst>::reallocate(void* p, size_t prev_s
 #ifdef _FREE_LIST_OFF
 using alloc = __malloc_alloc_template<0>;
 #else
-using alloc = __default_alloc_template<0, 0>;
+using alloc = __default_alloc_template<false, 0>;
 #endif /* _FREE_LIST_OFF */
 /* end check */
 
@@ -432,7 +432,7 @@ using alloc = __default_alloc_template<0, 0>;
 // Every container should specifiy its own simple_alloc() member functions;
 template <typename T, typename Alloc>
 class simple_alloc {
-  public:
+ public:
   static T* allocate(size_t n = 1) {
     return (n == 0 ? static_cast<T*>(nullptr) : (T*)Alloc::allocate(n * sizeof(T)));
   }

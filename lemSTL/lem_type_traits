@@ -131,7 +131,7 @@ struct __type_traits<long double> {
   using has_trivial_dtor = __true_tag;
   using is_POD_type = __true_tag;
 };
-/* end */
+/* end explicit */
 } // lem
 
 #endif
