@@ -16,7 +16,7 @@ struct random_access_iterator_tag : bidirectional_iterator_tag {};
 // Every container should specify its own iterator;
 template <typename Category,
           typename T,
-          typename DifferenceType = ::std::ptrdiff_t,
+          typename DifferenceType = ptrdiff_t,
           typename PointerType = T*,
           typename ReferenceType = T&
           >
