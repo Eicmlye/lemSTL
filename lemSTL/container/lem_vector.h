@@ -35,7 +35,7 @@ class vector {
   // <--------------------->
   //                  capacity
   // <--------------------------------------->
-  // | 1 | 2 | 3 | ... | n |   |   | ... |   |
+  // | 1 | 2 | 3 | ... | n |   |   | ... |   |xxxxxx
   //   |                     |                 |
   //   |                     |                 |
   // begin()                end()              |
@@ -50,17 +50,15 @@ class vector {
   vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {};
 
   // ctor;
-  explicit vector(size_type n) {
+  explicit vector(size_type n, const value_type& value = value_type()) {
     // allocate memory;
     mem_head_ = data_allocator::allocate(n);
     // initialize memory;
-    uninitialized_fill(mem_head_, data_tail_, 0);
-    // initialize memory tags;
-    mem_tail_ = mem_head_ + n;
-    data_tail_ = mem_head_;
-  }
-  vector(size_type n, const value_type& value) {
-    
+    uninitialized_fill_n(mem_head_, n, value);
+
+    // set memory tags;
+    data_tail_ = mem_head_ + n;
+    mem_tail_ = data_tail_;
   }
 
   // copy ctor;
@@ -75,8 +73,10 @@ class vector {
 
   /* dtor */
   ~vector(void) {
-    lem::destroy<iterator>(mem_head_, mem_tail_);
-    data_allocator::deallocate();
+    destroy(mem_head_, data_tail_); // uninitialized memory need not to be destroyed;
+    if (mem_head_ != nullptr) {
+      data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
+    }
   }
   /* end dtor */
 

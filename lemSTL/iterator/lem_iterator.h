@@ -59,7 +59,7 @@ class iterator_traits<T const*> {
 /* Functions to fetch nullptr to iterator_traits objects */
 template <typename Iter>
 inline typename iterator_traits<Iter>::value_type*
-value_type(Iter const&) {
+get_value_type(Iter const&) {
   return static_cast<typename iterator_traits<Iter>::value_type*>(nullptr);
 }
 /* end */
