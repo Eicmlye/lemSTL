@@ -3,7 +3,9 @@
 #define LEMSTL_LEM_ALLOC_H_
 
 #include <cstdlib> // for std::malloc() and std::free();
-#include <cassert> // for assert();
+#include <cassert> // for macro assert();
+
+#include "../lem_exception" // for lem::AllocError;
 
 namespace lem {
 /* _THROW_BAD_ALLOC settings */
@@ -195,7 +197,9 @@ class __default_alloc_template {
   static FreeList volatile free_list[__kNumFreeList];
   // choose min-sized proper free-list for required memory size;
   static size_t free_list_get_ind(size_t req_bytes_nonzero) {
-    assert(req_bytes_nonzero != 0);
+    if (req_bytes_nonzero == 0) {
+      throw lem::alloc_zero_free_list();
+    }
 
     return (req_bytes_nonzero - 1) / __kAlign;
   }

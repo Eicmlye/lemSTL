@@ -6,6 +6,7 @@
 
 #include "../lem_memory"
 #include "../lem_iterator"
+#include "../lem_exception"
 
 namespace lem {
 // See declarations at https://en.cppreference.com/w/cpp/container/vector;
@@ -81,54 +82,75 @@ class vector {
   /* end dtor */
 
   /* iterators */
-  iterator begin(void) const {
+  iterator begin(void) const noexcept {
     return mem_head_;
   }
-  iterator end(void) const {
+  iterator end(void) const noexcept {
     return data_tail_;
   }
   /* end iterators */
 
   /* state tags */
-  bool empty(void) const {
+  bool empty(void) const noexcept {
     return begin() == end();
   }
-  size_type size(void) const {
+  size_type size(void) const noexcept {
     return (size_type)(end() - begin());
   }
-  size_type capacity(void) const {
+  size_type capacity(void) const noexcept {
     return (size_type)(mem_tail_ - begin());
   }
   /* end state tags */
 
   /* accessors */
-  reference_type at(size_type pos) {
+  reference_type at(size_type pos) const {
     if (pos > size()) {
       throw std::out_of_range();
     }
 
     return *(begin() + pos);
   }
-  reference_type operator[](size_type pos) {
+  reference_type operator[](size_type pos) const noexcept {
     return *(begin() + pos);
   }
-  reference_type front(void) {
+  reference_type front(void) noexcept {
     return *(begin());
   }
-  reference_type back(void) {
+  reference_type back(void) noexcept {
     return *(end() - 1);
   }
   /* end accessors */
 
   /* member functions */
   void push_back(const value_type& value) {
+    if (data_tail_ != mem_tail_) { // memory available;
+      construct(end(), value);
+      ++data_tail_;
 
+      return;
+    }
+
+    // Now capacity full;
+    // reallocate memory;
   }
   void pop_back(void) {
-
+    if (empty()) {
+      throw lem::pop_empty_vector();
+    }
   }
   /* end member functions */
 };
+
+/* vector __type_traits */
+template <>
+struct __type_traits<vector> {
+  using has_trivial_default_ctor = __false_tag;
+  using has_trivial_copy_ctor = __false_tag;
+  using has_trivial_assignment_oprtr = __false_tag;
+  using has_trivial_dtor = __false_tag;
+  using is_POD_type = __false_tag;
+};
+/* end __type_traits */
 } // lem
 
 #endif
