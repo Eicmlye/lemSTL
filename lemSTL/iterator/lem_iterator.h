@@ -62,6 +62,11 @@ inline typename iterator_traits<Iter>::value_type*
 get_value_type(Iter const&) {
   return static_cast<typename iterator_traits<Iter>::value_type*>(nullptr);
 }
+template <typename Iter>
+inline typename iterator_traits<Iter>::value_type*
+get_iterator_category(Iter const&) {
+  return static_cast<typename iterator_traits<Iter>::iterator_category*>(nullptr);
+}
 /* end */
 } // lem
 
