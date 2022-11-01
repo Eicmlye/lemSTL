@@ -1,6 +1,7 @@
 # EM added
 # VS Code files
 .vscode/
+LEMSTLtest/
 
 # Visual studio files or CMake files
 out

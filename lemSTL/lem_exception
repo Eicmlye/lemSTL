@@ -1,5 +1,5 @@
-#ifndef LEMSTL_ELM_EXCEPTION_
-#define LEMSTL_ELM_EXCEPTION_
+#ifndef LEMSTL_LEM_EXCEPTION_
+#define LEMSTL_LEM_EXCEPTION_
 
 #include "exception/lem_exception_alloc.h"
 #include "exception/lem_exception_vector.h"
