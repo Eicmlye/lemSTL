@@ -2,10 +2,10 @@
 #ifndef LEMSTL_LEM_ALLOC_H_
 #define LEMSTL_LEM_ALLOC_H_
 
-#include <cstdlib> // for std::malloc() and std::free();
+#include <cstdlib> // for std::malloc() and std::free(); for exit() and macros;
 #include <cassert> // for macro assert();
 
-#include "../lem_exception" // for lem::AllocError;
+#include "../lem_exception" // for lem::alloc_zero_free_list;
 
 namespace lem {
 /* _THROW_BAD_ALLOC settings */
@@ -13,11 +13,10 @@ namespace lem {
 // because we are separating allocation with construction.
 #if 0 // never use ::operator new;
 # include <new>
-# define _THROW_BAD_ALLOC throw std::bad_alloc;
+# define _THROW_BAD_ALLOC throw std::bad_alloc();
 #elif !defined(_THROW_BAD_ALLOC)
 # include <iostream> // for std::cout and std::endl;
-# include <cstdlib> // for exit() and macros;
-# define _THROW_BAD_ALLOC std::cout << "AllocationFailure: out of memory. " << std::endl; exit(EXIT_FAILURE)
+# define _THROW_BAD_ALLOC ::std::cout << "AllocationFailure: out of memory. " << ::std::endl; exit(EXIT_FAILURE)
 #endif /* _THROW_BAD_ALLOC */
 
 /* malloc()-based allocator, usually slower than the free-list-based one */
@@ -25,8 +24,8 @@ namespace lem {
 // and is usually more efficient in space utilization.
 template <int inst>
 class __malloc_alloc_template {
- private:
-   /* functions for Out-Of-Memory cases */
+  private:
+    /* functions for Out-Of-Memory cases */
   static void* oom_malloc(size_t n);
   static void* oom_realloc(void* p, size_t n);
   // the solution to oom;
@@ -39,7 +38,7 @@ class __malloc_alloc_template {
   static void (*__malloc_alloc_oom_handler)();
   /* end oom functions */
 
- public:
+  public:
   static void* allocate(size_t n) {
     void* result = malloc(n);
     if (result == nullptr) {
@@ -171,17 +170,18 @@ constexpr size_t __kNumFreeList = __kMaxBytes / __kAlign; // number of kinds of 
 template <bool threads, int inst>
 class __default_alloc_template {
  private:
-   // align `req_bytes` to __kAlign;
-   // This function is correct only if __kAlign is some power of 2;
+    // align `req_bytes` to __kAlign;
+    // This function is correct only if __kAlign is some power of 2;
   static size_t round_up(size_t req_bytes) {
     return (req_bytes + __kAlign - 1) & ~(__kAlign - 1);
   }
 
   // free-list node;
-  typedef union FreeListNode {
+  using FreeListNode = union FreeListNode {
     union FreeListNode* next_; // When node is empty, this address next_ is stored in data memory.
     char data_[1]; // This must be in array form to save memory.
-  } FreeListNode, * FreeList;
+  };
+  using FreeList = FreeListNode*;
 
   // EM NOTE: free-list header list;
   //
@@ -215,20 +215,20 @@ class __default_alloc_template {
     // 3. rearrange spare memory from other free-lists;
     // 4. call malloc_alloc_template to solve oom cases;
     // num_node may decrease when allocation fails;
-    static char* mempool_alloc(size_t free_list_node_size, size_t& num_node);
+  static char* mempool_alloc(size_t free_list_node_size, size_t& num_node);
 
-    // variables for memory pool;
-    static char* mempool_head;
-    static char* mempool_tail;
-    static size_t alloced_from_heap;
-    /* end memory pool*/
+  // variables for memory pool;
+  static char* mempool_head;
+  static char* mempool_tail;
+  static size_t alloced_from_heap;
+  /* end memory pool*/
 
-  // When a certain sized (say sized n) free-list has no spare node,
-  // refill() tries to return an n-sized memory block from memory pool,
-  // and if there is extra memory in the pool,
-  // an extra number of empty nodes will link to the n-sized-node free-list.
-  // EM NOTE: This behaviour is similar to memory allocation of dynamic array, 
-  // where we realloc twice the memory it had when previous memory is used up.
+// When a certain sized (say sized n) free-list has no spare node,
+// refill() tries to return an n-sized memory block from memory pool,
+// and if there is extra memory in the pool,
+// an extra number of empty nodes will link to the n-sized-node free-list.
+// EM NOTE: This behaviour is similar to memory allocation of dynamic array, 
+// where we realloc twice the memory it had when previous memory is used up.
   static void* refill(size_t free_list_node_size);
   /* end memory arrangment */
 
@@ -239,7 +239,7 @@ class __default_alloc_template {
 };
 
 template <bool threads, int inst>
-__default_alloc_template<threads, inst>::FreeList volatile
+typename __default_alloc_template<threads, inst>::FreeList volatile
 __default_alloc_template<threads, inst>::free_list[__kNumFreeList] =
 { nullptr, nullptr, nullptr, nullptr,
   nullptr, nullptr, nullptr, nullptr,
@@ -254,9 +254,9 @@ template <bool threads, int inst>
 size_t __default_alloc_template<threads, inst>::alloced_from_heap = 0;
 
 template <bool threads, int inst>
-char* __default_alloc_template<threads, inst>::mempool_alloc(size_t free_list_node_size, 
+char* __default_alloc_template<threads, inst>::mempool_alloc(size_t free_list_node_size,
                                                              size_t& num_node
-                                                             ) {
+) {
   char* result = nullptr;
 
   // Compute remaining memory in memory pool;
@@ -298,7 +298,7 @@ char* __default_alloc_template<threads, inst>::mempool_alloc(size_t free_list_no
     // to make the allocated memory as continuous as possible.
     // Notice that the memory in the pool is n*8 bytes, so are the allocated ones.
     // Hence remain_bytes will always fit exactly into one free-list.
-    FreeList volatile *plist = free_list + free_list_get_ind(remain_bytes);
+    FreeList volatile* plist = free_list + free_list_get_ind(remain_bytes);
 
     // insert remain_bytes to the free-list;
     ((FreeListNode*)mempool_head)->next_ = *plist; // *plist == free_list[] == &(some_FreeListNode);
@@ -313,7 +313,7 @@ char* __default_alloc_template<threads, inst>::mempool_alloc(size_t free_list_no
     FreeList volatile* mov = nullptr;
     for (size_t size = free_list_node_size + __kAlign; size <= __kMaxBytes; size += __kAlign) {
       mov = free_list + free_list_get_ind(size);
-      
+
       // if there is spare block;
       if (*mov != nullptr) {
         // recycle this memory block to memory pool;
@@ -367,7 +367,7 @@ void* __default_alloc_template<threads, inst>::refill(size_t free_list_node_size
   // EM NOTE: notice that since we are calling refill(),
   // now (*plist)->next_ == nullptr.
   FreeList volatile* plist = free_list + free_list_get_ind(free_list_node_size);
-  *plist = mem_block + free_list_node_size;
+  *plist = (FreeListNode*)mem_block + free_list_node_size;
   FreeListNode* cur = (FreeListNode*)(mem_block + free_list_node_size);
   FreeListNode* pred = nullptr;
   for (size_t index = 1; index < num_node - 1; ++index) {
@@ -411,8 +411,8 @@ void __default_alloc_template<threads, inst>::deallocate(void* p, size_t n) {
   // Now n <= __kMaxBytes;
   // find proper free-list;
   FreeList volatile* plist = free_list + free_list_get_ind(n);
-  FreeListNode* recycled = p;
-  p->next_ = *plist;
+  FreeListNode* recycled = (FreeListNode*)p;
+  recycled->next_ = *plist;
   *plist = recycled;
 
   return;
@@ -436,7 +436,7 @@ using alloc = __default_alloc_template<false, 0>;
 // Every container should specifiy its own simple_alloc() member functions;
 template <typename T, typename Alloc>
 class simple_alloc {
- public:
+  public:
   static T* allocate(size_t n = 1) {
     return (n == 0 ? static_cast<T*>(nullptr) : (T*)Alloc::allocate(n * sizeof(T)));
   }

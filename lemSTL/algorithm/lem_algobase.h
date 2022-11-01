@@ -1,11 +1,12 @@
-#ifndef LEMSTL_LEM_ALGORITHM_H_
-#define LEMSTL_LEM_ALGORITHM_H_
+#ifndef LEMSTL_LEM_ALGOBASE_H_
+#define LEMSTL_LEM_ALGOBASE_H_
 
 #include <cstring> // for memmove();
 
 #include "../lem_iterator" // for iterator tags;
 #include "../lem_type_traits" // for __type_traits;
 
+namespace lem {
 template <typename ForwardIterator, typename T>
 void fill(ForwardIterator head, ForwardIterator tail, const T& value) {
   for (; head != tail; ++head) {
@@ -42,7 +43,11 @@ OutputIterator fill_n(OutputIterator head, SizeType n, const T& value) {
 // 
 template <typename InputIterator, typename OutputIterator, typename IterType>
 inline OutputIterator __copy(InputIterator head, InputIterator tail, OutputIterator result, const IterType&) {
-  return ;
+  return result; /* not solved */
+}
+template <typename InputIterator, typename OutputIterator>
+inline OutputIterator __copy_class(InputIterator head, InputIterator tail, OutputIterator result) {
+  return result; /* not solved */
 }
 // Use a functor to partial specialize a function;
 template <typename InputIterator, typename OutputIterator>
@@ -79,7 +84,7 @@ class __copy_dispatch {
   /* end native pointers */
 template <typename InputIterator, typename OutputIterator>
 inline OutputIterator copy(InputIterator head, InputIterator tail, OutputIterator result) {
-  return __copy_dispatch(head, tail, result);
+  return __copy_dispatch<InputIterator, OutputIterator>(head, tail, result);
 }
 // specialization for char pointers;
 inline char* copy(const char* head, const char* tail, char* result) {
@@ -88,5 +93,6 @@ inline char* copy(const char* head, const char* tail, char* result) {
   return result + (tail - head);
 }
 /* end copy() */
+}
 
 #endif /* LEMSTL_LEM_ALGORITHM_H_ */

@@ -4,7 +4,7 @@
 
 #include <new.h> // enable placement new;
 
-#include "../iterator/lem_iterator.h" // for iterator_traits;
+#include "../lem_iterator" // for iterator_traits;
 #include "../lem_type_traits" // for __type_traits;
 
 namespace lem {
@@ -39,7 +39,7 @@ inline void __destroy(ForwardIterator head, ForwardIterator tail, T*) {
 }
 template <typename ForwardIterator>
 inline void destroy(ForwardIterator head, ForwardIterator tail) {
-  __destroy(head, tail, value_type(head));
+  __destroy(head, tail, get_value_type(head));
 }
 /* end */
 } // lem

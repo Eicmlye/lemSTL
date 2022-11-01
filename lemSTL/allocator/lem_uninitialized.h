@@ -2,12 +2,13 @@
 #ifndef LEMSTL_LEM_UNINITIALIZED_H_
 #define LEMSTL_LEM_UNINITIALIZED_H_
 
-#include "../lem_iterator" // for value_type();
+#include "../lem_iterator" // for get_value_type();
 #include "../lem_type_traits" // for __type_traits;
-#include "../lem_algorithm/lem_algobase.h" // for fill(), fill_n(), and copy();
-#include "../lem_memory/lem_construct.h" // for construct();
+#include "../lem_algorithm" // for fill(), fill_n(), and copy();
+#include "../lem_memory" // for construct();
 #include "../lem_exception" // for std::exception;
 
+namespace lem {
 /* uninitialized_fill() */
 // fill elem to uninitialized allocated memory;
 template <typename ForwardIterator, typename DataType, typename ValueType>
@@ -21,8 +22,7 @@ void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, const 
     for (; cur != tail; ++cur) {
       construct(&*cur, elem);
     }
-  }
-  catch (const std::exception&) {
+  } catch (const std::exception&) {
     // commit or rollback semantics;
     destroy(head, cur);
     // Here it is impossible to get the allocator of the iterator,
@@ -53,8 +53,7 @@ ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, con
     for (; n != 0; --n, ++cur) {
       construct(&*cur, elem);
     }
-  }
-  catch (const std::exception&) {
+  } catch (const std::exception&) {
     // commit or rollback semantics;
     destroy(head, cur);
     // Here it is impossible to get the allocator of the iterator,
@@ -81,13 +80,12 @@ inline ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterato
 }
 template <typename InputIterator, typename ForwardIterator>
 ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail, ForwardIterator result, __false_tag) {
+  ForwardIterator cur = result;
   try {
-    ForwardIterator cur = result;
     for (; head != tail; ++head, ++cur) {
       construct(&*cur, *head);
     }
-  }
-  catch (const std::exception&) {
+  } catch (const std::exception&) {
     // commit or rollback;
     destroy(result, cur);
     // Here it is impossible to get the allocator of the iterator,
@@ -106,5 +104,6 @@ inline ForwardIterator uninitialized_copy(InputIterator head, InputIterator tail
   return __uninitialized_copy(head, tail, result, get_value_type(head));
 }
 /* end uninitialized_copy() */
+}
 
 #endif /* LEMSTL_LEM_UNINITIALIZED_H_ */

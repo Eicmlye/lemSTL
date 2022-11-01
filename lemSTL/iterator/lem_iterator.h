@@ -14,6 +14,8 @@ struct random_access_iterator_tag : bidirectional_iterator_tag {};
 
 // lem::iterator type;
 // Every container should specify its own iterator;
+// EM NOTE: c++ struct expect public scope for undeclared members,
+// while class expect private by default.
 template <typename Category,
           typename T,
           typename DifferenceType = ptrdiff_t,
@@ -39,7 +41,7 @@ struct iterator_traits {
 };
 // partial specialization for native pointers;
 template <typename T>
-class iterator_traits<T*> {
+struct iterator_traits<T*> {
   using iterator_category = random_access_iterator_tag;
   using value_type = T;
   using difference_type = std::ptrdiff_t;
@@ -48,7 +50,7 @@ class iterator_traits<T*> {
 };
 // partial specialization for native const pointers;
 template <typename T>
-class iterator_traits<T const*> {
+struct iterator_traits<T const*> {
   using iterator_category = random_access_iterator_tag;
   using value_type = T;
   using difference_type = std::ptrdiff_t;

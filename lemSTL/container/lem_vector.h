@@ -7,6 +7,7 @@
 #include "../lem_memory"
 #include "../lem_iterator"
 #include "../lem_exception"
+#include "../lem_type_traits" // for __type_traits;
 
 namespace lem {
 // See declarations at https://en.cppreference.com/w/cpp/container/vector;
@@ -103,15 +104,15 @@ class vector {
   /* end state tags */
 
   /* accessors */
-  reference_type at(size_type pos) const {
-    if (pos > size()) {
-      throw std::out_of_range();
+  reference_type at(size_type ind) const {
+    if (ind >= size()) {
+      throw std::out_of_range("Invalid vector subscript. ");
     }
 
-    return *(begin() + pos);
+    return *(begin() + ind);
   }
-  reference_type operator[](size_type pos) const noexcept {
-    return *(begin() + pos);
+  reference_type operator[](size_type ind) const noexcept {
+    return *(begin() + ind);
   }
   reference_type front(void) noexcept {
     return *(begin());
@@ -142,8 +143,8 @@ class vector {
 };
 
 /* vector __type_traits */
-template <>
-struct __type_traits<vector> {
+template <typename DataType, typename AllocType>
+struct __type_traits<vector<DataType, AllocType>> {
   using has_trivial_default_ctor = __false_tag;
   using has_trivial_copy_ctor = __false_tag;
   using has_trivial_assignment_oprtr = __false_tag;
