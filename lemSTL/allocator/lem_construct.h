@@ -14,6 +14,9 @@ inline void construct(AllocedObject* p, InitValue const& value) {
 }
 
 /* Destroy a specific object */
+// EM NOTE: you CAN destroy an object pointer that has ALREADY been destroyed.
+// This will not throw exceptions, because destroy() just destroy data
+// and will not do anything related to memory allocation.
 template <typename Object>
 inline void destroy(Object* p) {
   p->~Object(); // call dtor ~Object() manually, since placement new is used;
@@ -42,6 +45,6 @@ inline void destroy(ForwardIterator head, ForwardIterator tail) {
   __destroy(head, tail, get_value_type(head));
 }
 /* end */
-} // lem
+} /* end lem */
 
 #endif
