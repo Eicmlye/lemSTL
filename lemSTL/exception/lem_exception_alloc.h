@@ -15,6 +15,6 @@ class alloc_zero_free_list : public ::std::exception {
 
   explicit alloc_zero_free_list(const char* _Message) : _Mybase(_Message) {}
 };
-}
+} /* end lem */
 
 #endif

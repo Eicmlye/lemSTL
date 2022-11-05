@@ -22,11 +22,24 @@ void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, const 
     for (; cur != tail; ++cur) {
       construct(&*cur, elem);
     }
-  } catch (const std::exception&) {
+  } catch (const std::exception& e) {
     // commit or rollback semantics;
-    destroy(head, cur);
+    // 
+    // EM NOTE:
+    // We will leave destroy() to the user function, because the user function 
+    // may be using several construct() and unini_xxx() after this call for unini_xxx(). 
+    // The user should use try-catch for potential exceptions, 
+    // and can destroy all the constructed object in a single call
+    // of destroy(), which saves much time.
+    // 
     // Here it is impossible to get the allocator of the iterator,
     // so we cannot deallocate memory now.
+
+    // EM NOTE: here we cannot rely on the return value
+    // to check if the construction succeeded,
+    // so if exception occurs, we must throw it out to the user function
+    // to deallocate the memory.
+    throw e;
   }
 }
 template <typename ForwardIterator, typename DataType, typename ValueType>
@@ -53,11 +66,24 @@ ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, con
     for (; n != 0; --n, ++cur) {
       construct(&*cur, elem);
     }
-  } catch (const std::exception&) {
+  } catch (const std::exception& e) {
     // commit or rollback semantics;
-    destroy(head, cur);
+    // 
+    // EM NOTE:
+    // We will leave destroy() to the user function, because the user function 
+    // may be using several construct() and unini_xxx() after this call for unini_xxx(). 
+    // The user should use try-catch for potential exceptions, 
+    // and can destroy all the constructed object in a single call
+    // of destroy(), which saves much time.
+    // 
     // Here it is impossible to get the allocator of the iterator,
     // so we cannot deallocate memory now.
+
+    // EM NOTE: here we cannot rely on the return value
+    // to check if the construction succeeded,
+    // so if exception occurs, we must throw it out to the user function
+    // to deallocate the memory.
+    throw e;
   }
 
   return cur;
@@ -85,11 +111,24 @@ ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail,
     for (; head != tail; ++head, ++cur) {
       construct(&*cur, *head);
     }
-  } catch (const std::exception&) {
-    // commit or rollback;
-    destroy(result, cur);
+  } catch (const std::exception& e) {
+    // commit or rollback semantics;
+    // 
+    // EM NOTE:
+    // We will leave destroy() to the user function, because the user function 
+    // may be using several construct() and unini_xxx() after this call for unini_xxx(). 
+    // The user should use try-catch for potential exceptions, 
+    // and can destroy all the constructed object in a single call
+    // of destroy(), which saves much time.
+    // 
     // Here it is impossible to get the allocator of the iterator,
     // so we cannot deallocate memory now.
+
+    // EM NOTE: here we cannot rely on the return value
+    // to check if the construction succeeded,
+    // so if exception occurs, we must throw it out to the user function
+    // to deallocate the memory.
+    throw e;
   }
 
   return cur;
@@ -104,6 +143,6 @@ inline ForwardIterator uninitialized_copy(InputIterator head, InputIterator tail
   return __uninitialized_copy(head, tail, result, get_value_type(head));
 }
 /* end uninitialized_copy() */
-}
+} /* end lem */
 
 #endif /* LEMSTL_LEM_UNINITIALIZED_H_ */

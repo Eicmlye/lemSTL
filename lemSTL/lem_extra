@@ -1,0 +1,6 @@
+#ifndef LEMSTL_LEM_EXTRA
+#define LEMSTL_LEM_EXTRA
+
+#include "extra/lem_num.h"
+
+#endif

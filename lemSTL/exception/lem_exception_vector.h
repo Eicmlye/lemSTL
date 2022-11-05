@@ -15,6 +15,6 @@ class pop_empty_vector : public ::std::exception {
 
   explicit pop_empty_vector(const char* _Message) : _Mybase(_Message) {}
 };
-}
+} /* end lem */
 
 #endif

@@ -2,12 +2,46 @@
 #ifndef LEMSTL_LEM_VECTOR_H_
 #define LEMSTL_LEM_VECTOR_H_
 
+#ifdef LEM_DEBUG
+#include <iostream> // for cout, endl;
+#include <cstdlib> // for exit();
+
+using std::cout;
+using std::endl;
+#endif
+
 #include <cstddef> // for ::std::ptrdiff_t;
 
 #include "../lem_memory"
 #include "../lem_iterator"
 #include "../lem_exception"
 #include "../lem_type_traits" // for __type_traits;
+
+/* NOTICE ON try-catch BLOCKS FOR CONTAINERS */
+// EM NOTE: be caution to the logic of try-catch blocks:
+// always use try-catch if you use uninitialized_xxx(),
+// and only use in the following pattern:
+//
+// try {
+//  uninitialized_xxx(...);
+//  construct(...);
+//  ... // There may be several unini_xxx() and construct();
+//  uninitialized_xxx(...);
+//  construct(...);
+// }
+// catch (const std::exception& e) {
+//  /* commit or rollback semantics */
+//  destroy(...); // unnecessary only if there is only ONE construct() used, and no unini_xxx() is used;
+//  // data_allocator::deallocate(...); // only if you allocated new memory before try-catch;
+//  throw e;
+// }
+// 
+// The destroy() work has NOT been done by uninitialized-xxx().
+// If exception occurs, you should destroy all the objects in a single round.
+//
+// You should be clear that the above block will only catch exceptions in construct(),
+// i.e. in the ctor(). And you should throw the exception out to the user function
+// to let the user know this construction failure. 
 
 namespace lem {
 // See declarations at https://en.cppreference.com/w/cpp/container/vector;
@@ -33,6 +67,7 @@ class vector {
   // memory allocation;
   using data_allocator    = simple_alloc<value_type, allocator_type>;
 
+  // EM NOTE:
   //          data
   // <--------------------->
   //                  capacity
@@ -55,8 +90,19 @@ class vector {
   explicit vector(size_type n, const value_type& value = value_type()) {
     // allocate memory;
     mem_head_ = data_allocator::allocate(n);
-    // initialize memory;
-    uninitialized_fill_n(mem_head_, n, value);
+    try {
+      // initialize memory;
+      uninitialized_fill_n(mem_head_, n, value);
+    }
+    catch (const std::exception& e) {
+      // commit or rollback semantics;
+      destroy(mem_head_, mem_head_ + n);
+      data_allocator::deallocate(mem_head_, n);
+      #ifdef LEM_DEBUG
+        cout << "\tLEM_DEBUG: " << e.what() << endl;
+      #endif
+      throw e;
+    }
 
     // set memory tags;
     data_tail_ = mem_head_ + n;
@@ -75,6 +121,9 @@ class vector {
 
   /* dtor */
   ~vector(void) {
+    #ifdef LEM_DEBUG
+      cout << "\tLEM_DEBUG: Call ~vector(). " << endl;
+    #endif
     destroy(mem_head_, data_tail_); // uninitialized memory need not to be destroyed;
     if (mem_head_ != nullptr) {
       data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
@@ -133,6 +182,33 @@ class vector {
 
     // Now capacity full;
     // reallocate memory;
+    size_type prev_size = size();
+    size_type new_size = (prev_size == 0 ? 1 : 2 * prev_size);
+    iterator new_mem_head = data_allocator::allocate(new_size);
+    iterator new_data_tail = new_mem_head;
+    try {
+      // copy data;
+      new_data_tail = uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
+      // insert new data;
+      construct(new_data_tail, value);
+      ++new_data_tail;
+    }
+    catch (const std::exception& e) {
+      // commit or rollback semantics;
+      destroy(new_mem_head, new_data_tail);
+      data_allocator::deallocate(new_mem_head, new_size);
+      // throw out;
+      throw e;
+    }
+
+    // delete prev vector;
+    destroy(begin(), end());
+    data_allocator::deallocate(mem_head_, prev_size);
+
+    // update memory tags;
+    mem_head_ = new_mem_head;
+    mem_tail_ = new_mem_head + new_size;
+    data_tail_ = new_data_tail;
   }
   void pop_back(void) {
     if (empty()) {
@@ -152,6 +228,6 @@ struct __type_traits<vector<DataType, AllocType>> {
   using is_POD_type = __false_tag;
 };
 /* end __type_traits */
-} // lem
+} /* end lem */
 
 #endif

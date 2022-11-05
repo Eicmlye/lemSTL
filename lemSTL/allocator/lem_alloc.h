@@ -448,5 +448,5 @@ class simple_alloc {
     return;
   }
 };
-} // lem
+} /* end lem */
 #endif
