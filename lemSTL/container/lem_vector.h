@@ -68,12 +68,12 @@ class vector {
   using data_allocator    = simple_alloc<value_type, allocator_type>;
 
   // EM NOTE:
-  //          data
-  // <--------------------->
-  //                  capacity
-  // <--------------------------------------->
-  // | 1 | 2 | 3 | ... | n |   |   | ... |   |xxxxxx
-  //   |                     |                 |
+  //            data
+  //   <--------------------->
+  //                    capacity
+  //   <--------------------------------------->
+  //   | 1 | 2 | 3 | ... | n |   |   | ... |   |xxxxxx
+  //   ^                     ^                 ^
   //   |                     |                 |
   // begin()                end()              |
   // mem_head             data_tail         mem_tail
@@ -171,7 +171,7 @@ class vector {
   }
   /* end accessors */
 
-  /* member functions */
+  /* modifiers */
   void push_back(const value_type& value) {
     if (data_tail_ != mem_tail_) { // memory available;
       construct(end(), value);
@@ -214,8 +214,73 @@ class vector {
     if (empty()) {
       throw lem::pop_empty_vector();
     }
+
+    // Now non-empty vector;
+    --data_tail_;
+    destroy(data_tail_);
+
+    return;
   }
-  /* end member functions */
+  void resize(size_type n) {
+
+
+    return;
+  }
+  // erase() returns the iterator following the last removed element;
+  iterator erase(iterator iter) {
+    // erasing an empty range is an no-op;
+    if (iter == end()) {
+      return iter;
+    }
+
+    // if not erasing ending element;
+    if (iter + 1 != end()) { // shift elements after iter;
+      copy(iter + 1, end(), iter);
+    }
+
+    // update memory tags;
+    --data_tail_;
+    // destroy duplicant;
+    destroy(data_tail_);
+
+    return iter;
+  }
+  iterator erase(iterator head, iterator tail) {
+    // erasing an empty range is an no-op;
+    if (head > tail) { // This will produce duplicate elements after copy();
+      #ifdef LEM_DEBUG
+        throw lem::illegal_iterval();
+      #else
+        return tail;
+      #endif
+    }
+
+    // shift elements after tail;
+    iterator new_data_tail = copy(tail, end(), head);
+    // destroy duplicants;
+    destroy(new_data_tail, end());
+    // update memory tags;
+    data_tail_ = new_data_tail;
+
+    return head;
+  }
+  void clear(void) {
+    erase(begin(), end());
+  }
+  /* end modifiers */
+
+  /* capacity functions */
+  void reserve(size_type req) {
+
+
+    return;
+  }
+  void shrink_to_fit(void) {
+
+
+    return;
+  }
+  /* end capacity */
 };
 
 /* vector __type_traits */
