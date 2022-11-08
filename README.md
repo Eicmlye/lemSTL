@@ -12,7 +12,8 @@
 
 ### 0.2. 语法规则
 
-- `const` applies to the thing left of it. If there is nothing on the left then it applies to the thing right of it. 
+- `const` `volatile` applies to the thing left of it. If there is nothing on the left then it applies to the thing right of it. 
+- `T& func(void)` returns lvalue, while `T const& func(void)` returns rvalue.
 
 ### 0.3. 文件命名
 

@@ -68,7 +68,7 @@ class vector {
   using data_allocator    = simple_alloc<value_type, allocator_type>;
 
   // EM NOTE:
-  //            data
+  //            size
   //   <--------------------->
   //                    capacity
   //   <--------------------------------------->
@@ -87,7 +87,7 @@ class vector {
   vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {};
 
   // ctor;
-  explicit vector(size_type n, const value_type& value = value_type()) {
+  explicit vector(size_type n, value_type const& value = value_type()) {
     // allocate memory;
     mem_head_ = data_allocator::allocate(n);
     try {
@@ -140,18 +140,6 @@ class vector {
   }
   /* end iterators */
 
-  /* state tags */
-  bool empty(void) const noexcept {
-    return begin() == end();
-  }
-  size_type size(void) const noexcept {
-    return (size_type)(end() - begin());
-  }
-  size_type capacity(void) const noexcept {
-    return (size_type)(mem_tail_ - begin());
-  }
-  /* end state tags */
-
   /* accessors */
   reference_type at(size_type ind) const {
     if (ind >= size()) {
@@ -171,7 +159,130 @@ class vector {
   }
   /* end accessors */
 
+  /* capacity functions */
+  bool empty(void) const noexcept {
+    return begin() == end();
+  }
+  size_type size(void) const noexcept {
+    return (size_type)(end() - begin());
+  }
+  size_type capacity(void) const noexcept {
+    return (size_type)(mem_tail_ - begin());
+  }
+  // If req <= capacity, reserve() does nothing,
+  // otherwise the vector is reallocated and iterators will therefore be invalid.
+  void reserve(size_type req) {
+    if (req <= capacity()) {
+      return;
+    }
+
+    #ifdef LEM_DEBUG
+      cout << "\tLEM_DEBUG: Call reserve(). " << endl;
+    #endif
+    // Now req > capacity();
+    iterator new_mem_head = data_allocator::allocate(req);
+    iterator new_data_tail = new_mem_head;
+    try {
+      // move data to newly allocated memory;
+      new_data_tail = uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
+    }
+    catch (const std::exception& e) {
+      // if any construct() failed, new_data_tail would not be assigned to new value;
+      destroy(new_mem_head, new_mem_head + req);
+      data_allocator::deallocate(new_mem_head, req);
+      // throw out;
+      throw e;
+    }
+
+    // delete prev vector;
+    destroy(begin(), end());
+    data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
+
+    // update memory tags;
+    mem_head_ = new_mem_head;
+    data_tail_ = new_data_tail;
+    mem_tail_ = mem_head_ + req;
+
+    return;
+  }
+  void shrink_to_fit(void) {
+    if (size() == capacity()) {
+      return;
+    }
+
+    data_allocator::deallocate(data_tail_, mem_tail_ - data_tail_);
+    mem_tail_ = data_tail_;
+
+    return;
+  }
+  /* end capacity */
+
   /* modifiers */
+  iterator insert(iterator pos_iter, value_type const& value, size_type n = 1) {
+    if (n == 0) {
+      return pos_iter;
+    }
+
+    // if capacity is large enough;
+    if (n <= (size_type)(mem_tail_ - data_tail_)) {
+      size_type num_after_pos = data_tail_ - pos_iter;
+      iterator prev_data_tail = data_tail_;
+      // EM NOTE: we should not leave uninitialized memory
+      // between begin() and end() during insertation.
+      if (num_after_pos >= n) {
+        // deal with data in uninitialized memory;
+        uninitialized_copy(data_tail_ - n, data_tail_, data_tail_);
+        data_tail_ += n;
+        // move the rest part of existed data;
+        copy_backward(pos_iter, prev_data_tail - n, prev_data_tail);
+        // fill new data;
+        // EM QUESTION: is there any difference using fill() and fill_n() here?
+        fill_n(pos_iter, n, value);
+      }
+      else {
+        // deal with data in uninitialized memory;
+        uninitialized_fill_n(data_tail_, n - num_after_pos, value);
+        data_tail_ += n - num_after_pos;
+        // move existed data;
+        uninitialized_copy(pos_iter, prev_data_tail, data_tail_);
+        data_tail_ += num_after_pos;
+        // fill the rest part of new data;
+        // EM QUESTION: is there any difference using fill() and fill_n() here?
+        fill_n(pos_iter, num_after_pos, value);
+      }
+    }
+    // Now capacity not enough;
+    else {
+      size_type prev_size = size();
+      size_type new_size = prev_size + max(prev_size, n);
+      iterator new_mem_head = data_allocator::allocate(prev_size + n);
+      iterator new_data_tail = new_mem_head;
+
+      try {
+        new_data_tail = uninitialized_copy(mem_head_, pos_iter, new_mem_head);
+        new_data_tail = uninitialized_fill_n(new_data_tail, n, value);
+        new_data_tail = uninitialized_copy(pos_iter, data_tail_, new_data_tail);
+      }
+      catch (const std::exception& e) {
+        // commit or rollback semantics;
+        destroy(new_mem_head, new_mem_head + new_size);
+        data_allocator::deallocate(new_mem_head, new_size);
+        // throw out;
+        throw e;
+      }
+
+      // delete prev vector;
+      destroy(mem_head_, data_tail_);
+      data_allocator::deallocate(mem_head_, prev_size);
+
+      // update memory tags;
+      mem_head_ = new_mem_head;
+      data_tail_ = new_data_tail;
+      mem_tail_ = mem_head_ + new_size;
+    }
+
+    return pos_iter;
+  }
   void push_back(const value_type& value) {
     if (data_tail_ != mem_tail_) { // memory available;
       construct(end(), value);
@@ -182,6 +293,11 @@ class vector {
 
     // Now capacity full;
     // reallocate memory;
+    /* EM NOTE */
+    // here we should not use reserve(),
+    // because if construct() fails,
+    // the reallocation done by reserve() cannot be rolled back,
+    // and iterators will be invalid, which breaks the principle of c/r.
     size_type prev_size = size();
     size_type new_size = (prev_size == 0 ? 1 : 2 * prev_size);
     iterator new_mem_head = data_allocator::allocate(new_size);
@@ -209,6 +325,8 @@ class vector {
     mem_head_ = new_mem_head;
     mem_tail_ = new_mem_head + new_size;
     data_tail_ = new_data_tail;
+
+    return;
   }
   void pop_back(void) {
     if (empty()) {
@@ -221,8 +339,64 @@ class vector {
 
     return;
   }
-  void resize(size_type n) {
+  // resize() only changes capacity when new size is greater than current capacity;
+  void resize(size_type n, value_type const& value = value_type()) {
+    if (n == size()) {
+      return;
+    }
 
+    if (n < size()) {
+      destroy(mem_head_ + n, data_tail_);
+      data_tail_ = mem_head_ + n;
+
+      return;
+    }
+
+    // Now n > size();
+    // check whether to extend capacity;
+    if (n <= capacity()) {
+      try {
+        uninitialized_fill_n(data_tail_, n - size(), value);
+      }
+      catch (const std::exception& e) {
+        destroy(data_tail_, n - size());
+      }
+
+      // update memory tags;
+      data_tail_ = mem_head_ + n;
+
+      return;
+    }
+
+    // Now n > capacity();
+    // EM NOTE: here we should not use reserve(),
+    // because if uninitialized_fill_n() fails, 
+    // the reallocation done by reserve() cannot be rolled back.
+    iterator new_mem_head = data_allocator::allocate(n);
+    iterator new_data_tail = new_mem_head;
+
+    try {
+      // copy data;
+      new_data_tail = uninitialized_copy(mem_head_, data_tail_, new_mem_head);
+      // insert value;
+      uninitialized_fill_n(new_data_tail, n - size(), value);
+    }
+    catch (const std::exception& e) {
+      // commit or rollback semantics;
+      destroy(new_mem_head, new_data_tail);
+      data_allocator::deallocate(new_mem_head, n);
+      // throw out;
+      throw e;
+    }
+
+    // delete prev vector;
+    destroy(begin(), end());
+    data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
+
+    // update memory tags;
+    mem_head_ = new_mem_head;
+    data_tail_ = new_data_tail;
+    mem_tail_ = mem_head_ + n;
 
     return;
   }
@@ -268,19 +442,6 @@ class vector {
     erase(begin(), end());
   }
   /* end modifiers */
-
-  /* capacity functions */
-  void reserve(size_type req) {
-
-
-    return;
-  }
-  void shrink_to_fit(void) {
-
-
-    return;
-  }
-  /* end capacity */
 };
 
 /* vector __type_traits */
