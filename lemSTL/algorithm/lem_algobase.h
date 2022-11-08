@@ -111,6 +111,92 @@ inline char* copy(const char* head, const char* tail, char* result) {
   return result + (tail - head);
 }
 /* end copy() */
+
+/* copy_backward() */
+template <typename BidirectionalIterator1, typename BidirectionalIterator2>
+BidirectionalIterator2 __copy_backward(BidirectionalIterator1 head, BidirectionalIterator1 tail, BidirectionalIterator2 result_tail, input_iterator_tag) {
+  for (; head != tail; --tail, --result_tail) {
+    *result_tail = *tail;
+  }
+
+  return result_tail;
+}
+template <typename RandomAccessIterator, typename BidirectionalIterator>
+inline BidirectionalIterator __copy_backward(RandomAccessIterator head, RandomAccessIterator tail, BidirectionalIterator result_tail, random_access_iterator_tag) {
+  return __copy_backward_class(head, tail, result_tail, get_difference_type(head));
+}
+template <typename RandomAccessIterator, typename BidirectionalIterator, typename DiffType>
+BidirectionalIterator __copy_backward_class(RandomAccessIterator head, RandomAccessIterator tail, BidirectionalIterator result_tail, DiffType*) {
+  for (DiffType n = tail - head; n > 0; --tail, --result_tail, --n) {
+    *result_tail = *tail;
+  }
+
+  return result_tail;
+}
+// Use a functor to partial specialize a function;
+template <typename BidirectionalIterator1, typename BidirectionalIterator2>
+class __copy_backward_dispatch {
+  public:
+  BidirectionalIterator2 operator()(BidirectionalIterator1 head, BidirectionalIterator1 tail, BidirectionalIterator2 result_tail) {
+    return __copy_backward(head, tail, result_tail, get_iterator_category(head));
+  }
+};
+  /* deal with native pointers */
+  template <typename T>
+  inline T* __copy_backward_native(const T* head, const T* tail, T* result_tail, __true_tag) {
+    memmove(result_tail - (tail - head), head, sizeof(T) * (tail - head));
+
+    return result_tail - (tail - head);
+  }
+  template <typename T>
+  inline T* __copy_backward_native(const T* head, const T* tail, T* result_tail, __false_tag) {
+    return __copy_backward_class(head, tail, result_tail, get_difference_type(head));
+  }
+  template <typename T>
+  class __copy_backward_dispatch<T*, T*> {
+    public:
+    T* operator()(T* head, T* tail, T* result_tail) {
+      using triv_assgn = typename __type_traits<T>::has_trivial_assignment_oprtr;
+      return __copy_backward_native(head, tail, result_tail, triv_assgn());
+    }
+  };
+  template <typename T>
+  class __copy_backward_dispatch<const T*, T*> {
+    public:
+    T* operator()(const T* head, const T* tail, T* result_tail) {
+      using triv_assgn = typename __type_traits<T>::has_trivial_assignment_oprtr;
+      return __copy_backward_native(head, tail, result_tail, triv_assgn());
+    }
+  };
+  /* end native pointers */
+template <typename BidirectionalIterator1, typename BidirectionalIterator2>
+inline BidirectionalIterator2 copy_backward(BidirectionalIterator1 head, BidirectionalIterator1 tail, BidirectionalIterator2 result_tail) {
+  return __copy_backward_dispatch< BidirectionalIterator1, BidirectionalIterator2>()(head, tail, result_tail);
+}
+// specialization for char pointers;
+inline char* copy_backward(const char* head, const char* tail, char* result_tail) {
+  return copy(head, tail, result_tail - (tail - head));
+}
+/* end copy_backward() */
+
+/* max & min */
+template <typename T>
+inline T const& min(T const& a, T const& b) {
+  return (a < b ? a : b);
+}
+template <typename T, typename Comp>
+inline T const& min(T const& a, T const& b, Comp islt) {
+  return (islt(a, b) ? a : b);
+}
+template <typename T>
+inline T const& max(T const& a, T const& b) {
+  return (a < b ? b : a);
+}
+template <typename T, typename Comp>
+inline T const& max(T const& a, T const& b, Comp islt) {
+  return (islt(a, b) ? b : a);
+}
+/* end max & min */
 } /* end lem */
 
 #endif /* LEMSTL_LEM_ALGORITHM_H_ */

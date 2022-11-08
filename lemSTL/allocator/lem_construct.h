@@ -8,8 +8,8 @@
 #include "../lem_type_traits" // for __type_traits;
 
 namespace lem {
-template <typename AllocedObject, typename InitValue>
-inline void construct(AllocedObject* p, InitValue const& value) {
+template <typename AllocedObject, typename ValueType>
+inline void construct(AllocedObject* p, ValueType const& value) {
   new(p) AllocedObject(value); // placement new, call ctor AllocedObject(value);
 }
 
