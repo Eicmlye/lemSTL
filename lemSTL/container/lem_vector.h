@@ -3,14 +3,15 @@
 #define LEMSTL_LEM_VECTOR_H_
 
 #ifdef LEM_DEBUG
-#include <iostream> // for cout, endl;
-#include <cstdlib> // for exit();
+  #include <iostream> // for cout, endl;
+  #include <cstdlib> // for exit();
 
-using std::cout;
-using std::endl;
+  using std::cout;
+  using std::endl;
 #endif
 
-#include <cstddef> // for ::std::ptrdiff_t;
+#include <cstddef> // for std::ptrdiff_t;
+#include <initializer_list> // for std::initializer_list
 
 #include "../lem_memory"
 #include "../lem_iterator"
@@ -29,7 +30,7 @@ using std::endl;
 //  uninitialized_xxx(...);
 //  construct(...);
 // }
-// catch (const std::exception& e) {
+// catch (std::exception const& e) {
 //  /* commit or rollback semantics */
 //  destroy(...); // unnecessary only if there is only ONE construct() used, and no unini_xxx() is used;
 //  // data_allocator::deallocate(...); // only if you allocated new memory before try-catch;
@@ -87,6 +88,24 @@ class vector {
   vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {};
 
   // ctor;
+  vector(std::initializer_list<DataType> list) {
+    // allocate memory;
+    mem_head_ = data_allocator::allocate(list.size());
+    try {
+      uninitialized_copy(list.begin(), list.end(), mem_head_);
+    }
+    catch (std::exception const& e) {
+      // commit or rollback semantics;
+      destroy(mem_head_, mem_head_ + list.size());
+      data_allocator::deallocate(mem_head_, list.size());
+      // throw out;
+      throw e;
+    }
+
+    // set memory tags;
+    data_tail_ = mem_head_ + list.size();
+    mem_tail_ = data_tail_;
+  }
   explicit vector(size_type n, value_type const& value = value_type()) {
     // allocate memory;
     mem_head_ = data_allocator::allocate(n);
@@ -94,7 +113,7 @@ class vector {
       // initialize memory;
       uninitialized_fill_n(mem_head_, n, value);
     }
-    catch (const std::exception& e) {
+    catch (std::exception const& e) {
       // commit or rollback semantics;
       destroy(mem_head_, mem_head_ + n);
       data_allocator::deallocate(mem_head_, n);
@@ -186,7 +205,7 @@ class vector {
       // move data to newly allocated memory;
       new_data_tail = uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
     }
-    catch (const std::exception& e) {
+    catch (std::exception const& e) {
       // if any construct() failed, new_data_tail would not be assigned to new value;
       destroy(new_mem_head, new_mem_head + req);
       data_allocator::deallocate(new_mem_head, req);
@@ -263,7 +282,7 @@ class vector {
         new_data_tail = uninitialized_fill_n(new_data_tail, n, value);
         new_data_tail = uninitialized_copy(pos_iter, data_tail_, new_data_tail);
       }
-      catch (const std::exception& e) {
+      catch (std::exception const& e) {
         // commit or rollback semantics;
         destroy(new_mem_head, new_mem_head + new_size);
         data_allocator::deallocate(new_mem_head, new_size);
@@ -309,7 +328,7 @@ class vector {
       construct(new_data_tail, value);
       ++new_data_tail;
     }
-    catch (const std::exception& e) {
+    catch (std::exception const& e) {
       // commit or rollback semantics;
       destroy(new_mem_head, new_data_tail);
       data_allocator::deallocate(new_mem_head, new_size);
@@ -358,7 +377,7 @@ class vector {
       try {
         uninitialized_fill_n(data_tail_, n - size(), value);
       }
-      catch (const std::exception& e) {
+      catch (std::exception const& e) {
         destroy(data_tail_, n - size());
       }
 
@@ -381,7 +400,7 @@ class vector {
       // insert value;
       uninitialized_fill_n(new_data_tail, n - size(), value);
     }
-    catch (const std::exception& e) {
+    catch (std::exception const& e) {
       // commit or rollback semantics;
       destroy(new_mem_head, new_data_tail);
       data_allocator::deallocate(new_mem_head, n);

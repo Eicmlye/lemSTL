@@ -22,7 +22,7 @@ void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, const 
     for (; cur != tail; ++cur) {
       construct(&*cur, elem);
     }
-  } catch (const std::exception& e) {
+  } catch (std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:
@@ -66,7 +66,7 @@ ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, con
     for (; n != 0; --n, ++cur) {
       construct(&*cur, elem);
     }
-  } catch (const std::exception& e) {
+  } catch (std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:
@@ -111,7 +111,7 @@ ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail,
     for (; head != tail; ++head, ++cur) {
       construct(&*cur, *head);
     }
-  } catch (const std::exception& e) {
+  } catch (std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:
