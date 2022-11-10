@@ -1,0 +1,6 @@
+#ifndef LEM_TEST_
+#define LEM_TEST_
+
+#include "lem_test.h"
+
+#endif
