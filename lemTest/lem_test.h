@@ -13,6 +13,10 @@ class lemTestCase {
   char const* case_name_;
   bool case_result_ = true;
 
+  #ifdef LEM_DEBUG
+    ~lemTestCase(void) { std::cout << "\tLEM_DEBUG: Call dtor lemTestCase. " << std::endl; }
+  #endif
+
   lemTestCase(char const* case_name) : case_name_(case_name) {};
 
   virtual void run_test(void) = 0;
@@ -22,25 +26,44 @@ class lemTestCase {
 /* class testManager */
 class testManager {
  public:
-  bool result_ = true; // whether all the testcases passed;
-  size_t passed_ = 0;
-  size_t failed_ = 0;
-  lemTestCase* currentTestcase_ = nullptr;
+  bool result_; // whether all the testcases passed;
+  size_t passed_;
+  size_t failed_;
+  lemTestCase* currentTestcase_;
+  
+  testManager(void) :
+    result_(true), 
+    passed_(0), 
+    failed_(0), 
+    currentTestcase_(nullptr),
+    testcases_({}) {
+
+  }
+  ~testManager(void) {
+    // destroy all testcases, avoid memory leak;
+    for (lem::vector<lemTestCase*>::iterator iter = testcases_.begin(); iter != testcases_.end(); ++iter) {
+      destroy(*iter);
+    }
+    destroy(&testcases_);
+    #ifdef LEM_DEBUG
+      std::cout << "\tLEM_DEBUG: Call dtor testManager. " << std::endl;
+    #endif
+  }
 
   static testManager* getManager(void);
-  lemTestCase* registerTestCase(lemTestCase* testcase);
+  lemTestCase* registerTestcase(lemTestCase* testcase);
   void runTestList(void);
 
  protected:
   lem::vector<lemTestCase*> testcases_;
 };
 
-testManager* testManager::getManager(void) {
+lem::testManager* testManager::getManager(void) {
   static testManager manager;
 
   return &manager;
 }
-lemTestCase* testManager::registerTestCase(lemTestCase* testcase) {
+lemTestCase* testManager::registerTestcase(lemTestCase* testcase) {
   testcases_.push_back(testcase);
 
   return testcase;
@@ -51,8 +74,9 @@ void testManager::runTestList(void) {
     currentTestcase_ = *iter;
 
     std::cout << "========" << std::endl;
-    std::cout << "Run testcase " << currentTestcase_->case_name_ << "..." << std::endl;
+    std::cout << "Run testcase " << currentTestcase_->case_name_ << "..." << std::endl << std::endl;
     currentTestcase_->run_test();
+    std::cout << std::endl;
     std::cout << "End testcase " << currentTestcase_->case_name_ << ". " << std::endl;
     std::cout << "========" << std::endl;
 
@@ -87,7 +111,7 @@ void testManager::runTestList(void) {
   };\
   \
   lem::lemTestCase* const TESTCASE_NAME(testcase_name)::testcase_ =\
-    lem::testManager::getManager()->registerTestCase(new TESTCASE_NAME(testcase_name)(#testcase_name));\
+    lem::testManager::getManager()->registerTestcase(new TESTCASE_NAME(testcase_name)(#testcase_name));\
   void TESTCASE_NAME(testcase_name)::run_test(void) /* user add content for test */
 
 #define RUN_ALL_TESTS() lem::testManager::getManager()->runTestList();

@@ -203,7 +203,7 @@ class vector {
     iterator new_data_tail = new_mem_head;
     try {
       // move data to newly allocated memory;
-      new_data_tail = uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
+      new_data_tail = uninitialized_copy(mem_head_, data_tail_, new_mem_head);
     }
     catch (std::exception const& e) {
       // if any construct() failed, new_data_tail would not be assigned to new value;
