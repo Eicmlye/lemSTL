@@ -203,7 +203,7 @@ class vector {
     iterator new_data_tail = new_mem_head;
     try {
       // move data to newly allocated memory;
-      new_data_tail = uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
+      new_data_tail = uninitialized_copy(mem_head_, data_tail_, new_mem_head);
     }
     catch (std::exception const& e) {
       // if any construct() failed, new_data_tail would not be assigned to new value;
@@ -378,7 +378,10 @@ class vector {
         uninitialized_fill_n(data_tail_, n - size(), value);
       }
       catch (std::exception const& e) {
-        destroy(data_tail_, n - size());
+        // commit or rollback semantics;
+        destroy(data_tail_, data_tail_ + n - size());
+        // throw out;
+        throw e;
       }
 
       // update memory tags;
@@ -398,7 +401,7 @@ class vector {
       // copy data;
       new_data_tail = uninitialized_copy(mem_head_, data_tail_, new_mem_head);
       // insert value;
-      uninitialized_fill_n(new_data_tail, n - size(), value);
+      new_data_tail = uninitialized_fill_n(new_data_tail, n - size(), value);
     }
     catch (std::exception const& e) {
       // commit or rollback semantics;
