@@ -98,6 +98,7 @@
   TEST(int_vector_reserve) {
     lem::vector<int> vec = {};
 
+    // empty reserve test;
     vec.reserve(5);
 
     EXPECT_EQ_INT_VECTOR(vec, {});
@@ -105,16 +106,42 @@
     EXPECT_EQ(vec.capacity(), 5);
 
     vec.insert(vec.begin(), 1, 3);
+    // unrealloc reserve test;
     vec.reserve(3);
 
     EXPECT_EQ_INT_VECTOR(vec, { 1, 1, 1 });
     EXPECT_EQ(vec.size(), 3);
     EXPECT_EQ(vec.capacity(), 5);
 
+    // realloc reserve test;
     vec.reserve(10);
 
     EXPECT_EQ_INT_VECTOR(vec, { 1, 1, 1 });
     EXPECT_EQ(vec.size(), 3);
+    EXPECT_EQ(vec.capacity(), 10);
+  }
+  TEST(int_vector_resize) {
+    lem::vector<int> vec = {};
+
+    // empty resize test;
+    vec.resize(5);
+
+    EXPECT_EQ_INT_VECTOR(vec, { 0, 0, 0, 0, 0 });
+    EXPECT_EQ(vec.size(), 5);
+    EXPECT_EQ(vec.capacity(), 5);
+
+    // unrealloc reserve test;
+    vec.resize(3);
+
+    EXPECT_EQ_INT_VECTOR(vec, { 0, 0, 0 });
+    EXPECT_EQ(vec.size(), 3);
+    EXPECT_EQ(vec.capacity(), 5);
+
+    // realloc reserve test;
+    vec.resize(10);
+
+    EXPECT_EQ_INT_VECTOR(vec, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+    EXPECT_EQ(vec.size(), 10);
     EXPECT_EQ(vec.capacity(), 10);
   }
 #endif
