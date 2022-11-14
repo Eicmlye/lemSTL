@@ -3,10 +3,11 @@
 #include <iostream>
 
 // #define LEM_DEBUG
-#include "lemTest/lem_test"
+#include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
   #define TEST_VECTOR_
+  #define TEST_LIST_
 #endif
 
 #ifdef TEST_VECTOR_
@@ -145,6 +146,12 @@
     EXPECT_EQ(vec.capacity(), 10);
   }
 #endif
+#ifdef  TEST_LIST_
+  #include "lemSTL/lem_list"
+
+
+#endif
+
 
 
 int main(void) {

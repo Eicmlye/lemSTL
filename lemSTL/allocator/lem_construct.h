@@ -25,24 +25,24 @@ inline void destroy(Object* p) {
 
 /* Destroy objects in a specific range */
 template <typename ForwardIterator>
-inline void __destroy_aux(ForwardIterator head, ForwardIterator tail, __false_tag) {
+inline void __destroy_aux(ForwardIterator head, ForwardIterator tail, ::lem::__false_tag) {
   for (; head < tail; ++head) {
-    destroy(&*head);
+    ::lem::destroy(&*head);
   }
 }
 template <typename ForwardIterator>
-inline void __destroy_aux(ForwardIterator, ForwardIterator, __true_tag) {}
+inline void __destroy_aux(ForwardIterator, ForwardIterator, ::lem::__true_tag) {}
 // EM NOTE: here we use __destroy_aux() instead of IF condition statements
 // to make sure destroy() is inline and can be determined during compile time. 
 // Less time is used runtime.
 template <typename ForwardIterator, typename T>
 inline void __destroy(ForwardIterator head, ForwardIterator tail, T*) {
   using dtor_type_tag = typename __type_traits<T>::has_trivial_dtor;
-  __destroy_aux(head, tail, dtor_type_tag());
+  ::lem::__destroy_aux(head, tail, dtor_type_tag());
 }
 template <typename ForwardIterator>
 inline void destroy(ForwardIterator head, ForwardIterator tail) {
-  __destroy(head, tail, get_value_type(head));
+  ::lem::__destroy(head, tail, ::lem::get_value_type(head));
 }
 /* end */
 } /* end lem */

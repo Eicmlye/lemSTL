@@ -4,7 +4,7 @@
 #include "../lem_exception"
 
 namespace lem {
-const char* getOrdTag(const size_t num) {
+const char* getOrdTag(size_t const num) {
   size_t tenth = num % 10;
   size_t hundredth = num % 100;
   bool normal100 = !(tenth > 0 && tenth < 4) || (hundredth > 10 && hundredth < 14); // not x1st, x2nd and x3rd, caution for 11th, 12th and 13th;
@@ -21,7 +21,7 @@ const char* getOrdTag(const size_t num) {
   case 3:
     return "-rd";
   default:
-    throw lem::impossible_ord(num);
+    throw ::lem::impossible_ord(num);
   }
 
   return "-th";

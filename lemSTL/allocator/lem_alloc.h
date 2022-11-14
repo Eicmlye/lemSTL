@@ -16,7 +16,7 @@ namespace lem {
 # define _THROW_BAD_ALLOC throw std::bad_alloc();
 #elif !defined(_THROW_BAD_ALLOC)
 # include <iostream> // for std::cout and std::endl;
-# define _THROW_BAD_ALLOC ::std::cout << "AllocationFailure: out of memory. " << ::std::endl; exit(EXIT_FAILURE)
+# define _THROW_BAD_ALLOC ::std::cout << "AllocationFailure: out of memory. " << ::std::endl; ::std::exit(EXIT_FAILURE)
 #endif /* _THROW_BAD_ALLOC */
 
 /* malloc()-based allocator, usually slower than the free-list-based one */
@@ -198,7 +198,7 @@ class __default_alloc_template {
   // choose min-sized proper free-list for required memory size;
   static size_t free_list_get_ind(size_t req_bytes_nonzero) {
     if (req_bytes_nonzero == 0) {
-      throw lem::alloc_zero_free_list();
+      throw ::lem::alloc_zero_free_list();
     }
 
     return (req_bytes_nonzero - 1) / __kAlign;
@@ -436,7 +436,7 @@ using alloc = __default_alloc_template<false, 0>;
 // Every container should specifiy its own simple_alloc() member functions;
 template <typename T, typename Alloc>
 class simple_alloc {
-  public:
+ public:
   static T* allocate(size_t n = 1) {
     return (n == 0 ? static_cast<T*>(nullptr) : (T*)Alloc::allocate(n * sizeof(T)));
   }

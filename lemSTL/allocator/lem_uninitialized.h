@@ -12,17 +12,18 @@ namespace lem {
 /* uninitialized_fill() */
 // fill elem to uninitialized allocated memory;
 template <typename ForwardIterator, typename DataType, typename ValueType>
-inline void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, const DataType& elem, __true_tag) {
-  fill(head, tail, elem);
+inline void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, DataType const& elem, ::lem::__true_tag) {
+  ::lem::fill(head, tail, elem);
 }
 template <typename ForwardIterator, typename DataType, typename ValueType>
-void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, const DataType& elem, __false_tag) {
+void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, DataType const& elem, ::lem::__false_tag) {
   ForwardIterator cur = head;
   try {
     for (; cur != tail; ++cur) {
-      construct(&*cur, elem);
+      ::lem::construct(&*cur, elem);
     }
-  } catch (std::exception const& e) {
+  }
+  catch (::std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:
@@ -43,30 +44,30 @@ void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, const 
   }
 }
 template <typename ForwardIterator, typename DataType, typename ValueType>
-inline void __uninitialized_fill(ForwardIterator head, ForwardIterator tail, const DataType& elem, ValueType*) {
+inline void __uninitialized_fill(ForwardIterator head, ForwardIterator tail, DataType const& elem, ValueType*) {
   using is_POD = typename __type_traits<ValueType>::is_POD_type;
-  __uninitialized_fill_aux(head, tail, elem, is_POD());
+  ::lem::__uninitialized_fill_aux(head, tail, elem, is_POD());
 }
 template <typename ForwardIterator, typename DataType>
-inline void uninitialized_fill(ForwardIterator head, ForwardIterator tail, const DataType& elem) {
-  __uninitialized_fill(head, tail, elem, get_value_type(head));
+inline void uninitialized_fill(ForwardIterator head, ForwardIterator tail, DataType const& elem) {
+  ::lem::__uninitialized_fill(head, tail, elem, ::lem::get_value_type(head));
 }
 /* end uninitialized_fill() */
 
 /* uninitialized_fill_n() */
 // Here we return the tail iterator for further use;
 template <typename ForwardIterator, typename DataType, typename SizeType>
-inline ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, const DataType& elem, __true_tag) {
-  return fill_n(head, n, elem);
+inline ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, DataType const& elem, ::lem::__true_tag) {
+  return ::lem::fill_n(head, n, elem);
 }
 template <typename ForwardIterator, typename DataType, typename SizeType>
-ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, const DataType& elem, __false_tag) {
+ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, DataType const& elem, ::lem::__false_tag) {
   ForwardIterator cur = head;
   try {
     for (; n != 0; --n, ++cur) {
-      construct(&*cur, elem);
+      ::lem::construct(&*cur, elem);
     }
-  } catch (std::exception const& e) {
+  } catch (::std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:
@@ -89,29 +90,29 @@ ForwardIterator __uninitialized_fill_n_aux(ForwardIterator head, SizeType n, con
   return cur;
 }
 template <typename ForwardIterator, typename DataType, typename SizeType, typename ValueType>
-inline ForwardIterator __uninitialized_fill_n(ForwardIterator head, SizeType n, const DataType& elem, ValueType*) {
+inline ForwardIterator __uninitialized_fill_n(ForwardIterator head, SizeType n, DataType const& elem, ValueType*) {
   using is_POD = typename __type_traits<ValueType>::is_POD_type;
-  return __uninitialized_fill_n_aux(head, n, elem, is_POD());
+  return ::lem::__uninitialized_fill_n_aux(head, n, elem, is_POD());
 }
 template <typename ForwardIterator, typename DataType, typename SizeType>
-inline ForwardIterator uninitialized_fill_n(ForwardIterator head, SizeType n, const DataType& elem) {
-  return __uninitialized_fill_n(head, n, elem, get_value_type(head));
+inline ForwardIterator uninitialized_fill_n(ForwardIterator head, SizeType n, DataType const& elem) {
+  return ::lem::__uninitialized_fill_n(head, n, elem, ::lem::get_value_type(head));
 }
 /* end uninitialized_fill_n() */
 
 /* uninitialized_copy() */
 template <typename InputIterator, typename ForwardIterator>
-inline ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail, ForwardIterator result, __true_tag) {
-  return copy(head, tail, result);
+inline ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail, ForwardIterator result, ::lem::__true_tag) {
+  return ::lem::copy(head, tail, result);
 }
 template <typename InputIterator, typename ForwardIterator>
-ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail, ForwardIterator result, __false_tag) {
+ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail, ForwardIterator result, ::lem::__false_tag) {
   ForwardIterator cur = result;
   try {
     for (; head != tail; ++head, ++cur) {
-      construct(&*cur, *head);
+      ::lem::construct(&*cur, *head);
     }
-  } catch (std::exception const& e) {
+  } catch (::std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:
@@ -136,11 +137,11 @@ ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail,
 template <typename InputIterator, typename ForwardIterator, typename ValueType>
 inline ForwardIterator __uninitialized_copy(InputIterator head, InputIterator tail, ForwardIterator result, const ValueType&) {
   using is_POD = typename __type_traits<ValueType>::is_POD_type;
-  return __uninitialized_copy_aux(head, tail, result, is_POD());
+  return ::lem::__uninitialized_copy_aux(head, tail, result, is_POD());
 }
 template <typename InputIterator, typename ForwardIterator>
 inline ForwardIterator uninitialized_copy(InputIterator head, InputIterator tail, ForwardIterator result) {
-  return __uninitialized_copy(head, tail, result, get_value_type(head));
+  return ::lem::__uninitialized_copy(head, tail, result, ::lem::get_value_type(head));
 }
 /* end uninitialized_copy() */
 } /* end lem */
