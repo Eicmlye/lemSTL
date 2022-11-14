@@ -8,7 +8,7 @@
 
 namespace lem {
 template <typename ForwardIterator, typename T>
-void fill(ForwardIterator head, ForwardIterator tail, const T& value) {
+void fill(ForwardIterator head, ForwardIterator tail, T const& value) {
   for (; head != tail; ++head) {
     *head = value;
   }
@@ -17,7 +17,7 @@ void fill(ForwardIterator head, ForwardIterator tail, const T& value) {
 }
 
 template <typename OutputIterator, typename SizeType, typename T>
-OutputIterator fill_n(OutputIterator head, SizeType n, const T& value) {
+OutputIterator fill_n(OutputIterator head, SizeType n, T const& value) {
   for (; n != 0; --n, ++head) {
     *head = value;
   }
@@ -42,8 +42,16 @@ OutputIterator fill_n(OutputIterator head, SizeType n, const T& value) {
 //                      |
 //                      +----else---->__copy()
 
+template <typename RandomAccessIterator, typename OutputIterator, typename DiffType>
+OutputIterator __copy_class(RandomAccessIterator head, RandomAccessIterator tail, OutputIterator result, DiffType* a) {
+  for (DiffType n = tail - head; n > 0; ++head, ++result, --n) {
+    *result = *head;
+  }
+
+  return result;
+}
 template <typename InputIterator, typename OutputIterator>
-OutputIterator __copy(InputIterator head, InputIterator tail, OutputIterator result, input_iterator_tag) {
+OutputIterator __copy(InputIterator head, InputIterator tail, OutputIterator result, ::lem::input_iterator_tag) {
   for (; head != tail; ++head, ++result) {
     *result = *head;
   }
@@ -51,35 +59,28 @@ OutputIterator __copy(InputIterator head, InputIterator tail, OutputIterator res
   return result;
 }
 template <typename RandomAccessIterator, typename OutputIterator>
-inline OutputIterator __copy(RandomAccessIterator head, RandomAccessIterator tail, OutputIterator result, random_access_iterator_tag) {
-  return __copy_class(head, tail, result, get_difference_type(head));
+inline OutputIterator __copy(RandomAccessIterator head, RandomAccessIterator tail, OutputIterator result, ::lem::random_access_iterator_tag) {
+  return __copy_class(head, tail, result, ::lem::get_difference_type(head));
 }
-template <typename RandomAccessIterator, typename OutputIterator, typename DiffType>
-OutputIterator __copy_class(RandomAccessIterator head, RandomAccessIterator tail, OutputIterator result, DiffType*) {
-  for (DiffType n = tail - head; n > 0; ++head, ++result, --n) {
-    *result = *head;
-  }
 
-  return result;
-}
 // Use a functor to partial specialize a function;
 template <typename InputIterator, typename OutputIterator>
 class __copy_dispatch {
  public:
   OutputIterator operator()(InputIterator head, InputIterator tail, OutputIterator result) {
-    return __copy(head, tail, result, get_iterator_category(head));
+    return __copy(head, tail, result, ::lem::get_iterator_category(head));
   }
 };
   /* deal with native pointers */
   template <typename T>
-  inline T* __copy_native(const T* head, const T* tail, T* result, __true_tag) {
-    memmove(result, head, sizeof(T) * (tail - head));
+  inline T* __copy_native(const T* head, const T* tail, T* result, ::lem::__true_tag) {
+    ::std::memmove(result, head, sizeof(T) * (tail - head));
 
     return result + (tail - head);
   }
   template <typename T>
-  inline T* __copy_native(const T* head, const T* tail, T* result, __false_tag) {
-    return __copy_class(head, tail, result, get_difference_type(head));
+  inline T* __copy_native(const T* head, const T* tail, T* result, ::lem::__false_tag) {
+    return __copy_class(head, tail, result, ::lem::get_difference_type(head));
   }
   template <typename T>
   class __copy_dispatch<T*, T*> {
@@ -106,25 +107,13 @@ inline OutputIterator copy(InputIterator head, InputIterator tail, OutputIterato
 }
 // specialization for char pointers;
 inline char* copy(const char* head, const char* tail, char* result) {
-  memmove(result, head, tail - head);
+  ::std::memmove(result, head, tail - head);
 
   return result + (tail - head);
 }
 /* end copy() */
 
 /* copy_backward() */
-template <typename BidirectionalIterator1, typename BidirectionalIterator2>
-BidirectionalIterator2 __copy_backward(BidirectionalIterator1 head, BidirectionalIterator1 tail, BidirectionalIterator2 result_tail, input_iterator_tag) {
-  for (; head != tail; --tail, --result_tail) {
-    *result_tail = *tail;
-  }
-
-  return result_tail;
-}
-template <typename RandomAccessIterator, typename BidirectionalIterator>
-inline BidirectionalIterator __copy_backward(RandomAccessIterator head, RandomAccessIterator tail, BidirectionalIterator result_tail, random_access_iterator_tag) {
-  return __copy_backward_class(head, tail, result_tail, get_difference_type(head));
-}
 template <typename RandomAccessIterator, typename BidirectionalIterator, typename DiffType>
 BidirectionalIterator __copy_backward_class(RandomAccessIterator head, RandomAccessIterator tail, BidirectionalIterator result_tail, DiffType*) {
   for (DiffType n = tail - head; n > 0; --tail, --result_tail, --n) {
@@ -133,24 +122,36 @@ BidirectionalIterator __copy_backward_class(RandomAccessIterator head, RandomAcc
 
   return result_tail;
 }
+template <typename BidirectionalIterator1, typename BidirectionalIterator2>
+BidirectionalIterator2 __copy_backward(BidirectionalIterator1 head, BidirectionalIterator1 tail, BidirectionalIterator2 result_tail, ::lem::input_iterator_tag) {
+  for (; head != tail; --tail, --result_tail) {
+    *result_tail = *tail;
+  }
+
+  return result_tail;
+}
+template <typename RandomAccessIterator, typename BidirectionalIterator>
+inline BidirectionalIterator __copy_backward(RandomAccessIterator head, RandomAccessIterator tail, BidirectionalIterator result_tail, ::lem::random_access_iterator_tag) {
+  return __copy_backward_class(head, tail, result_tail, ::lem::get_difference_type(head));
+}
 // Use a functor to partial specialize a function;
 template <typename BidirectionalIterator1, typename BidirectionalIterator2>
 class __copy_backward_dispatch {
   public:
   BidirectionalIterator2 operator()(BidirectionalIterator1 head, BidirectionalIterator1 tail, BidirectionalIterator2 result_tail) {
-    return __copy_backward(head, tail, result_tail, get_iterator_category(head));
+    return __copy_backward(head, tail, result_tail, ::lem::get_iterator_category(head));
   }
 };
   /* deal with native pointers */
   template <typename T>
   inline T* __copy_backward_native(const T* head, const T* tail, T* result_tail, __true_tag) {
-    memmove(result_tail - (tail - head), head, sizeof(T) * (tail - head));
+    ::std::memmove(result_tail - (tail - head), head, sizeof(T) * (tail - head));
 
     return result_tail - (tail - head);
   }
   template <typename T>
   inline T* __copy_backward_native(const T* head, const T* tail, T* result_tail, __false_tag) {
-    return __copy_backward_class(head, tail, result_tail, get_difference_type(head));
+    return __copy_backward_class(head, tail, result_tail, ::lem::get_difference_type(head));
   }
   template <typename T>
   class __copy_backward_dispatch<T*, T*> {
@@ -175,7 +176,9 @@ inline BidirectionalIterator2 copy_backward(BidirectionalIterator1 head, Bidirec
 }
 // specialization for char pointers;
 inline char* copy_backward(const char* head, const char* tail, char* result_tail) {
-  return copy(head, tail, result_tail - (tail - head));
+  ::std::memmove(result_tail - (tail - head), head, tail - head);
+
+  return result_tail - (tail - head);
 }
 /* end copy_backward() */
 

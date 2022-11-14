@@ -52,21 +52,21 @@ class vector {
   // Member types;
   // allocator traits;
   using allocator_type    = AllocType;
+
   // iterator traits;
   using iterator          = DataType*; 
   using reverse_iterator  = DataType*;
-  /* using iterator_category = random_access_iterator_tag; */ // native pointer iterator;
+
+  // Data type;
+  using size_type         = size_t;
   using value_type        = DataType;
   using difference_type   = ptrdiff_t;
   using pointer_type      = DataType*;
   using reference_type    = DataType&;
 
-  // Data type;
-  using size_type         = size_t;
-
  protected:
   // memory allocation;
-  using data_allocator    = simple_alloc<value_type, allocator_type>;
+  using data_allocator    = ::lem::simple_alloc<value_type, allocator_type>;
 
   // EM NOTE:
   //            size
@@ -85,18 +85,18 @@ class vector {
  public:
   /* ctor */
   // default ctor;
-  vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {};
+  vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {}
 
   // ctor;
-  vector(std::initializer_list<DataType> list) {
+  vector(::std::initializer_list<DataType> list) {
     // allocate memory;
     mem_head_ = data_allocator::allocate(list.size());
     try {
-      uninitialized_copy(list.begin(), list.end(), mem_head_);
+      ::lem::uninitialized_copy(list.begin(), list.end(), mem_head_);
     }
-    catch (std::exception const& e) {
+    catch (::std::exception const& e) {
       // commit or rollback semantics;
-      destroy(mem_head_, mem_head_ + list.size());
+      ::lem::destroy(mem_head_, mem_head_ + list.size());
       data_allocator::deallocate(mem_head_, list.size());
       // throw out;
       throw e;
@@ -115,7 +115,7 @@ class vector {
     }
     catch (std::exception const& e) {
       // commit or rollback semantics;
-      destroy(mem_head_, mem_head_ + n);
+      ::lem::destroy(mem_head_, mem_head_ + n);
       data_allocator::deallocate(mem_head_, n);
       #ifdef LEM_DEBUG
         cout << "\tLEM_DEBUG: " << e.what() << endl;
@@ -143,7 +143,7 @@ class vector {
     #ifdef LEM_DEBUG
       cout << "\tLEM_DEBUG: Call ~vector(). " << endl;
     #endif
-    destroy(mem_head_, data_tail_); // uninitialized memory need not to be destroyed;
+    ::lem::destroy(mem_head_, data_tail_); // uninitialized memory need not to be destroyed;
     if (mem_head_ != nullptr) {
       data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
     }
@@ -203,18 +203,18 @@ class vector {
     iterator new_data_tail = new_mem_head;
     try {
       // move data to newly allocated memory;
-      new_data_tail = uninitialized_copy(mem_head_, data_tail_, new_mem_head);
+      new_data_tail = ::lem::uninitialized_copy(mem_head_, data_tail_, new_mem_head);
     }
     catch (std::exception const& e) {
       // if any construct() failed, new_data_tail would not be assigned to new value;
-      destroy(new_mem_head, new_mem_head + req);
+      ::lem::destroy(new_mem_head, new_mem_head + req);
       data_allocator::deallocate(new_mem_head, req);
       // throw out;
       throw e;
     }
 
     // delete prev vector;
-    destroy(begin(), end());
+    ::lem::destroy(begin(), end());
     data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
 
     // update memory tags;
@@ -250,24 +250,24 @@ class vector {
       // between begin() and end() during insertation.
       if (num_after_pos >= n) {
         // deal with data in uninitialized memory;
-        uninitialized_copy(data_tail_ - n, data_tail_, data_tail_);
+        ::lem::uninitialized_copy(data_tail_ - n, data_tail_, data_tail_);
         data_tail_ += n;
         // move the rest part of existed data;
-        copy_backward(pos_iter, prev_data_tail - n, prev_data_tail);
+        ::lem::copy_backward(pos_iter, prev_data_tail - n, prev_data_tail);
         // fill new data;
         // EM QUESTION: is there any difference using fill() and fill_n() here?
-        fill_n(pos_iter, n, value);
+        ::lem::fill_n(pos_iter, n, value);
       }
       else {
         // deal with data in uninitialized memory;
-        uninitialized_fill_n(data_tail_, n - num_after_pos, value);
+        ::lem::uninitialized_fill_n(data_tail_, n - num_after_pos, value);
         data_tail_ += n - num_after_pos;
         // move existed data;
-        uninitialized_copy(pos_iter, prev_data_tail, data_tail_);
+        ::lem::uninitialized_copy(pos_iter, prev_data_tail, data_tail_);
         data_tail_ += num_after_pos;
         // fill the rest part of new data;
         // EM QUESTION: is there any difference using fill() and fill_n() here?
-        fill_n(pos_iter, num_after_pos, value);
+        ::lem::fill_n(pos_iter, num_after_pos, value);
       }
     }
     // Now capacity not enough;
@@ -278,20 +278,20 @@ class vector {
       iterator new_data_tail = new_mem_head;
 
       try {
-        new_data_tail = uninitialized_copy(mem_head_, pos_iter, new_mem_head);
-        new_data_tail = uninitialized_fill_n(new_data_tail, n, value);
-        new_data_tail = uninitialized_copy(pos_iter, data_tail_, new_data_tail);
+        new_data_tail = ::lem::uninitialized_copy(mem_head_, pos_iter, new_mem_head);
+        new_data_tail = ::lem::uninitialized_fill_n(new_data_tail, n, value);
+        new_data_tail = ::lem::uninitialized_copy(pos_iter, data_tail_, new_data_tail);
       }
-      catch (std::exception const& e) {
+      catch (::std::exception const& e) {
         // commit or rollback semantics;
-        destroy(new_mem_head, new_mem_head + new_size);
+        ::lem::destroy(new_mem_head, new_mem_head + new_size);
         data_allocator::deallocate(new_mem_head, new_size);
         // throw out;
         throw e;
       }
 
       // delete prev vector;
-      destroy(mem_head_, data_tail_);
+      ::lem::destroy(mem_head_, data_tail_);
       data_allocator::deallocate(mem_head_, prev_size);
 
       // update memory tags;
@@ -304,7 +304,7 @@ class vector {
   }
   void push_back(const value_type& value) {
     if (data_tail_ != mem_tail_) { // memory available;
-      construct(end(), value);
+      ::lem::construct(end(), value);
       ++data_tail_;
 
       return;
@@ -323,21 +323,21 @@ class vector {
     iterator new_data_tail = new_mem_head;
     try {
       // copy data;
-      new_data_tail = uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
+      new_data_tail = ::lem::uninitialized_copy(mem_head_, mem_tail_, new_mem_head);
       // insert new data;
-      construct(new_data_tail, value);
+      ::lem::construct(new_data_tail, value);
       ++new_data_tail;
     }
     catch (std::exception const& e) {
       // commit or rollback semantics;
-      destroy(new_mem_head, new_data_tail);
+      ::lem::destroy(new_mem_head, new_data_tail);
       data_allocator::deallocate(new_mem_head, new_size);
       // throw out;
       throw e;
     }
 
     // delete prev vector;
-    destroy(begin(), end());
+    ::lem::destroy(begin(), end());
     data_allocator::deallocate(mem_head_, prev_size);
 
     // update memory tags;
@@ -354,7 +354,7 @@ class vector {
 
     // Now non-empty vector;
     --data_tail_;
-    destroy(data_tail_);
+    ::lem::destroy(data_tail_);
 
     return;
   }
@@ -365,7 +365,7 @@ class vector {
     }
 
     if (n < size()) {
-      destroy(mem_head_ + n, data_tail_);
+      ::lem::destroy(mem_head_ + n, data_tail_);
       data_tail_ = mem_head_ + n;
 
       return;
@@ -375,11 +375,11 @@ class vector {
     // check whether to extend capacity;
     if (n <= capacity()) {
       try {
-        uninitialized_fill_n(data_tail_, n - size(), value);
+        ::lem::uninitialized_fill_n(data_tail_, n - size(), value);
       }
       catch (std::exception const& e) {
         // commit or rollback semantics;
-        destroy(data_tail_, data_tail_ + n - size());
+        ::lem::destroy(data_tail_, data_tail_ + n - size());
         // throw out;
         throw e;
       }
@@ -399,20 +399,20 @@ class vector {
 
     try {
       // copy data;
-      new_data_tail = uninitialized_copy(mem_head_, data_tail_, new_mem_head);
+      new_data_tail = ::lem::uninitialized_copy(mem_head_, data_tail_, new_mem_head);
       // insert value;
-      new_data_tail = uninitialized_fill_n(new_data_tail, n - size(), value);
+      new_data_tail = ::lem::uninitialized_fill_n(new_data_tail, n - size(), value);
     }
     catch (std::exception const& e) {
       // commit or rollback semantics;
-      destroy(new_mem_head, new_data_tail);
+      ::lem::destroy(new_mem_head, new_data_tail);
       data_allocator::deallocate(new_mem_head, n);
       // throw out;
       throw e;
     }
 
     // delete prev vector;
-    destroy(begin(), end());
+    ::lem::destroy(begin(), end());
     data_allocator::deallocate(mem_head_, mem_tail_ - mem_head_);
 
     // update memory tags;
@@ -437,7 +437,7 @@ class vector {
     // update memory tags;
     --data_tail_;
     // destroy duplicant;
-    destroy(data_tail_);
+    ::lem::destroy(data_tail_);
 
     return iter;
   }
@@ -452,9 +452,9 @@ class vector {
     }
 
     // shift elements after tail;
-    iterator new_data_tail = copy(tail, end(), head);
+    iterator new_data_tail = ::lem::copy(tail, end(), head);
     // destroy duplicants;
-    destroy(new_data_tail, end());
+    ::lem::destroy(new_data_tail, end());
     // update memory tags;
     data_tail_ = new_data_tail;
 
@@ -469,11 +469,11 @@ class vector {
 /* vector __type_traits */
 template <typename DataType, typename AllocType>
 struct __type_traits<vector<DataType, AllocType>> {
-  using has_trivial_default_ctor = __false_tag;
-  using has_trivial_copy_ctor = __false_tag;
-  using has_trivial_assignment_oprtr = __false_tag;
-  using has_trivial_dtor = __false_tag;
-  using is_POD_type = __false_tag;
+  using has_trivial_default_ctor = ::lem::__false_tag;
+  using has_trivial_copy_ctor = ::lem::__false_tag;
+  using has_trivial_assignment_oprtr = ::lem::__false_tag;
+  using has_trivial_dtor = ::lem::__false_tag;
+  using is_POD_type = ::lem::__false_tag;
 };
 /* end __type_traits */
 } /* end lem */

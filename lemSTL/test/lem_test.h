@@ -2,26 +2,27 @@
 #define LEM_TEST_H_
 
 #include <iostream>
+
 #include "../lemSTL/lem_vector" // for lem::vector;
 
 // See https://www.cnblogs.com/coderzh/archive/2009/04/12/1434155.html;
 
 namespace lem {
-/* class lemTestCase */
-class lemTestCase {
+/* class testcase */
+class testcase {
  public:
   char const* case_name_;
   bool case_result_ = true;
 
   #ifdef LEM_DEBUG
-    ~lemTestCase(void) { std::cout << "\tLEM_DEBUG: Call dtor lemTestCase. " << std::endl; }
+    ~testcase(void) { std::cout << "\tLEM_DEBUG: Call dtor testcase. " << std::endl; }
   #endif
 
-  lemTestCase(char const* case_name) : case_name_(case_name) {};
+  testcase(char const* case_name) : case_name_(case_name) {}
 
   virtual void run_test(void) = 0;
 };
-/* end class lemTestCase */
+/* end class testcase */
 
 /* class testManager */
 class testManager {
@@ -29,7 +30,7 @@ class testManager {
   bool result_; // whether all the testcases passed;
   size_t passed_;
   size_t failed_;
-  lemTestCase* currentTestcase_;
+  testcase* currentTestcase_;
   
   testManager(void) :
     result_(true), 
@@ -41,7 +42,7 @@ class testManager {
   }
   ~testManager(void) {
     // destroy all testcases, avoid memory leak;
-    for (lem::vector<lemTestCase*>::iterator iter = testcases_.begin(); iter != testcases_.end(); ++iter) {
+    for (lem::vector<testcase*>::iterator iter = testcases_.begin(); iter != testcases_.end(); ++iter) {
       destroy(*iter);
     }
     destroy(&testcases_);
@@ -51,26 +52,26 @@ class testManager {
   }
 
   static testManager* getManager(void);
-  lemTestCase* registerTestcase(lemTestCase* testcase);
+  testcase* registerTestcase(testcase* testcase);
   void runTestList(void);
 
  protected:
-  lem::vector<lemTestCase*> testcases_;
+  lem::vector<testcase*> testcases_;
 };
 
-lem::testManager* testManager::getManager(void) {
+testManager* testManager::getManager(void) {
   static testManager manager;
 
   return &manager;
 }
-lemTestCase* testManager::registerTestcase(lemTestCase* testcase) {
+testcase* testManager::registerTestcase(testcase* testcase) {
   testcases_.push_back(testcase);
 
   return testcase;
 }
 void testManager::runTestList(void) {
   result_ = true;
-  for (lem::vector<lemTestCase*>::iterator iter = testcases_.begin(); iter != testcases_.end(); ++iter) {
+  for (lem::vector<testcase*>::iterator iter = testcases_.begin(); iter != testcases_.end(); ++iter) {
     currentTestcase_ = *iter;
 
     std::cout << "========" << std::endl;
@@ -100,21 +101,21 @@ void testManager::runTestList(void) {
 #define TESTCASE_NAME(testcase_name) testcase_name##_TEST
 
 #define TEST(testcase_name) \
-  class TESTCASE_NAME(testcase_name) : public lem::lemTestCase {\
+  class TESTCASE_NAME(testcase_name) : public ::lem::testcase {\
    public:\
-    TESTCASE_NAME(testcase_name)(char const* case_name) : lem::lemTestCase(case_name) {};\
+    TESTCASE_NAME(testcase_name)(char const* case_name) : ::lem::testcase(case_name) {};\
     virtual void run_test(void);\
     \
    private:\
     /* EM QUESTION: why static? */\
-    static lem::lemTestCase* const testcase_;\
+    static ::lem::testcase* const testcase_;\
   };\
   \
-  lem::lemTestCase* const TESTCASE_NAME(testcase_name)::testcase_ =\
-    lem::testManager::getManager()->registerTestcase(new TESTCASE_NAME(testcase_name)(#testcase_name));\
+  ::lem::testcase* const TESTCASE_NAME(testcase_name)::testcase_ =\
+    ::lem::testManager::getManager()->registerTestcase(new TESTCASE_NAME(testcase_name)(#testcase_name));\
   void TESTCASE_NAME(testcase_name)::run_test(void) /* user add content for test */
 
-#define RUN_ALL_TESTS() lem::testManager::getManager()->runTestList();
+#define RUN_ALL_TESTS() ::lem::testManager::getManager()->runTestList();
 /* end macros */
 } /* end lem */
 
