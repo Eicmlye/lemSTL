@@ -6,7 +6,7 @@
 #include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
-  #define TEST_VECTOR_
+//  #define TEST_VECTOR_
   #define TEST_LIST_
 #endif
 
@@ -149,10 +149,11 @@
 #ifdef  TEST_LIST_
   #include "lemSTL/lem_list"
 
+  TEST(int_list_push_back) {
+    lem::list<int> lst;
+  }
 
 #endif
-
-
 
 int main(void) {
   #ifdef LEM_TEST_
