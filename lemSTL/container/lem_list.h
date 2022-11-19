@@ -52,20 +52,20 @@ struct __list_node {
   __list_node<DataType>* pred_ = nullptr;
   __list_node<DataType>* next_ = nullptr;
 };
-} /* end lem */
 
 template <typename DataType, typename PointerType, typename ReferenceType>
 struct __list_iterator {
-  using iterator_category = ::lem::bidirectional_iterator_tag;
-  using value_type = DataType;
-  using difference_type = ptrdiff_t;
-  using pointer_type = PointerType;
-  using reference_type = ReferenceType;
+  using iterator_category     = ::lem::bidirectional_iterator_tag;
+  using value_type            = DataType;
+  using difference_type       = ptrdiff_t;
+  using pointer_type          = PointerType;
+  using reference_type        = ReferenceType;
 
-  using self = __list_iterator<value_type, pointer_type, reference_type>;
-  using iterator = __list_iterator<value_type, value_type*, value_type&>;
-  using node_pointer = ::lem::__list_node<value_type>*;
+  using self                  = __list_iterator<value_type, pointer_type, reference_type>;
+  using iterator              = __list_iterator<value_type, value_type*, value_type&>;
+  using node_pointer          = ::lem::__list_node<value_type>*;
 
+  // data;
   node_pointer node_;
 
   // ctor;
@@ -138,7 +138,7 @@ class list {
   using pointer_type        = DataType*;
   using reference_type      = DataType&;
   using node_type           = ::lem::__list_node<value_type>;
-  using node_pointer           = ::lem::__list_node<value_type>*;
+  using node_pointer        = ::lem::__list_node<value_type>*;
 
  protected:
   using list_node_allocator = ::lem::simple_alloc<node_type, allocator_type>;
@@ -146,6 +146,7 @@ class list {
   // data;
   node_pointer head_; // pointer to empty header node;
 
+ public:
   /* ctor */
   // default ctor;
   list(void) {
@@ -153,7 +154,24 @@ class list {
     head_->next_ = head_;
     head_->pred_ = head_;
   }
-
   /* end ctor */
+  /* dtor */
+
+  /* end dtor */
+
+  void push_back(const value_type& value) {
+    // build new node;
+    node_pointer newNode = list_node_allocator::allocate();
+    ::lem::construct(&(newNode->data_), value);
+
+    // insert to list end;
+    newNode->pred_ = head_->pred_;
+    newNode->next_ = head_;
+    newNode->pred_->next_ = newNode;
+    head_->pred_ = newNode;
+
+    return;
+  }
 };
+} /* end lem */
 #endif
