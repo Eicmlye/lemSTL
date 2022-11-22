@@ -37,7 +37,7 @@
 //  throw e;
 // }
 // 
-// The destroy() work has NOT been done by uninitialized-xxx().
+// The destroy() work has NOT been done by uninitialized_xxx().
 // If exception occurs, you should destroy all the objects in a single round.
 //
 // You should be clear that the above block will only catch exceptions in construct(),
@@ -88,22 +88,22 @@ class vector {
   vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {}
 
   // ctor;
-  vector(::std::initializer_list<DataType> list) {
+  vector(::std::initializer_list<DataType> init_list) {
     // allocate memory;
-    mem_head_ = data_allocator::allocate(list.size());
+    mem_head_ = data_allocator::allocate(init_list.size());
     try {
-      ::lem::uninitialized_copy(list.begin(), list.end(), mem_head_);
+      ::lem::uninitialized_copy(init_list.begin(), init_list.end(), mem_head_);
     }
     catch (::std::exception const& e) {
       // commit or rollback semantics;
-      ::lem::destroy(mem_head_, mem_head_ + list.size());
-      data_allocator::deallocate(mem_head_, list.size());
+      ::lem::destroy(mem_head_, mem_head_ + init_list.size());
+      data_allocator::deallocate(mem_head_, init_list.size());
       // throw out;
       throw e;
     }
 
     // set memory tags;
-    data_tail_ = mem_head_ + list.size();
+    data_tail_ = mem_head_ + init_list.size();
     mem_tail_ = data_tail_;
   }
   explicit vector(size_type n, value_type const& value = value_type()) {
@@ -111,7 +111,7 @@ class vector {
     mem_head_ = data_allocator::allocate(n);
     try {
       // initialize memory;
-      uninitialized_fill_n(mem_head_, n, value);
+      ::lem::uninitialized_fill_n(mem_head_, n, value);
     }
     catch (std::exception const& e) {
       // commit or rollback semantics;
@@ -151,26 +151,26 @@ class vector {
   /* end dtor */
 
   /* iterators */
-  iterator begin(void) const noexcept {
+  iterator begin(void) noexcept {
     return mem_head_;
   }
-  iterator end(void) const noexcept {
+  iterator end(void) noexcept {
     return data_tail_;
   }
   /* end iterators */
 
   /* accessors */
-  reference_type at(size_type ind) const {
+  reference_type at(size_type ind) {
     if (ind >= size()) {
       throw std::out_of_range("Invalid vector subscript. ");
     }
 
     return *(begin() + ind);
   }
-  reference_type operator[](size_type ind) const noexcept {
+  reference_type operator[](size_type ind) noexcept {
     return *(begin() + ind);
   }
-  reference_type front(void) noexcept {
+  reference_type front(void)  noexcept {
     return *(begin());
   }
   reference_type back(void) noexcept {
@@ -179,13 +179,14 @@ class vector {
   /* end accessors */
 
   /* capacity functions */
-  bool empty(void) const noexcept {
+  bool empty(void) noexcept {
     return begin() == end();
   }
-  size_type size(void) const noexcept {
+  size_type size(void) noexcept {
     return (size_type)(end() - begin());
+//    return (size_type)::lem::distance(begin(), end());
   }
-  size_type capacity(void) const noexcept {
+  size_type capacity(void) noexcept {
     return (size_type)(mem_tail_ - begin());
   }
   // If req <= capacity, reserve() does nothing,

@@ -112,7 +112,8 @@ ForwardIterator __uninitialized_copy_aux(InputIterator head, InputIterator tail,
     for (; head != tail; ++head, ++cur) {
       ::lem::construct(&*cur, *head);
     }
-  } catch (::std::exception const& e) {
+  }
+  catch (::std::exception const& e) {
     // commit or rollback semantics;
     // 
     // EM NOTE:

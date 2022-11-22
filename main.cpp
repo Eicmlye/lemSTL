@@ -6,7 +6,7 @@
 #include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
-//  #define TEST_VECTOR_
+  #define TEST_VECTOR_
   #define TEST_LIST_
 #endif
 
@@ -146,13 +146,25 @@
     EXPECT_EQ(vec.capacity(), 10);
   }
 #endif
-#ifdef  TEST_LIST_
+#ifdef TEST_LIST_
   #include "lemSTL/lem_list"
 
-  TEST(int_list_push_back) {
-    lem::list<int> lst;
-  }
+  TEST(int_list_ctor) {
+    lem::list<int> lst = { 1, 2, 3 };
 
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 3 });
+    EXPECT_NEQ_INT_LIST(lst, { 1, 2, 3, 4 });
+    EXPECT_NEQ_INT_LIST(lst, { 1, 2, 4 });
+  }
+  TEST(int_list_iterator) {
+    lem::list<int> lst = { 1, 2, 3, 4, 5 };
+    lem::list<int>::iterator cur = lst.begin();
+
+    EXPECT_EQ(*cur, 1);
+    ++cur; ++cur;
+    EXPECT_NEQ(*cur, 2);
+    EXPECT_EQ(*cur, 3);
+  }
 #endif
 
 int main(void) {

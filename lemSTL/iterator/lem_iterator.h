@@ -70,11 +70,37 @@ get_difference_type(Iter const&) {
   return static_cast<typename iterator_traits<Iter>::difference_type*>(nullptr);
 }
 template <typename Iter>
-inline typename iterator_traits<Iter>::value_type*
+inline typename iterator_traits<Iter>::iterator_category
 get_iterator_category(Iter const&) {
-  return static_cast<typename iterator_traits<Iter>::iterator_category*>(nullptr);
+  // iterator category struct is simple enough.
+  // The getter need not return pointer and instead returns an object.
+  return typename iterator_traits<Iter>::iterator_category();
 }
 /* end functions to fetch nullptr */
+
+/* distance */
+template <typename InputIterator>
+inline typename iterator_traits<InputIterator>::difference_type
+__distance(InputIterator head, InputIterator tail, ::lem::input_iterator_tag) {
+  typename iterator_traits<InputIterator>::difference_type dist = 0;
+  while (head != tail) {
+    ++dist;
+    ++head;
+  }
+
+  return dist;
+}
+template <typename RandomAccessIterator>
+inline typename iterator_traits<RandomAccessIterator>::difference_type
+__distance(RandomAccessIterator head, RandomAccessIterator tail, ::lem::random_access_iterator_tag) {
+  return tail - head;
+}
+template <typename InputIterator>
+inline typename iterator_traits<InputIterator>::difference_type
+distance(InputIterator head, InputIterator tail) {
+  return ::lem::__distance(head, tail, ::lem::get_iterator_category(head));
+}
+/* end distance */
 } /* end lem */
 
 #endif

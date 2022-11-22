@@ -14,7 +14,7 @@
 #include <initializer_list> // for std::initializer_list
 
 #include "../lem_memory"
-#include "../lem_iterator"
+#include "../lem_iterator" // for distance();
 #include "../lem_exception"
 #include "../lem_type_traits" // for __type_traits;
 
@@ -37,7 +37,7 @@
 //  throw e;
 // }
 // 
-// The destroy() work has NOT been done by uninitialized-xxx().
+// The destroy() work has NOT been done by uninitialized_xxx().
 // If exception occurs, you should destroy all the objects in a single round.
 //
 // You should be clear that the above block will only catch exceptions in construct(),
@@ -63,7 +63,7 @@ struct __list_iterator {
 
   using self                  = __list_iterator<value_type, pointer_type, reference_type>;
   using iterator              = __list_iterator<value_type, value_type*, value_type&>;
-  using node_pointer          = ::lem::__list_node<value_type>*;
+  using node_pointer          = __list_node<value_type>*;
 
   // data;
   node_pointer node_;
@@ -144,6 +144,16 @@ class list {
   using list_node_allocator = ::lem::simple_alloc<node_type, allocator_type>;
 
   // data;
+  /* EM NOTE: data structure */
+  //      -----------------------------------------------
+  //      |                                             |
+  //      v                                             |
+  // ---------     ---------     -------     ---------  |
+  // | head_ | --> | elem1 | --> | ... | --> | elemk | --
+  // ---------     ---------     -------     ---------
+  //     ^             ^
+  //     |             |
+  //    end()       begin()
   node_pointer head_; // pointer to empty header node;
 
  public:
@@ -154,24 +164,122 @@ class list {
     head_->next_ = head_;
     head_->pred_ = head_;
   }
-  /* end ctor */
-  /* dtor */
 
+  // ctor;
+  list(::std::initializer_list<value_type> init_list) {
+    // set header node;
+    head_ = list_node_allocator::allocate();
+    head_->next_ = head_;
+    head_->pred_ = head_;
+
+    try {
+      // build data;
+      // See https://stackoverflow.com/questions/71104242
+      // and https://stackoverflow.com/questions/610245
+      // for why typename is necessary here.
+      // Here value_type is a template argument,
+      // and therefore this type name is a dependent name.
+      /* potential error (when typename is omitted): 
+      error C3878: syntax error: unexpected token 'identifier' following 'expression' */
+      typename ::std::initializer_list<value_type>::iterator iter = init_list.begin();
+
+      for (; iter != init_list.end(); ++iter) {
+        // allocate memory;
+        node_pointer newNode = list_node_allocator::allocate();
+
+        // construct data;
+        ::lem::construct(&(newNode->data_), *iter);
+
+        // link to list;
+        newNode->next_ = head_;
+        newNode->pred_ = head_->pred_;
+        head_->pred_->next_ = newNode;
+        head_->pred_ = newNode;
+      }
+    }
+    catch (::std::exception const& e) {
+      // commit or rollback semantics;
+      // destroy data;
+      ::lem::destroy(iterator(head_->next_), iterator(head_));
+      for (; head_->pred_ != head_;) {
+        node_pointer cur = head_->pred_;
+
+        cur->pred_->next_ = head_;
+        head_->pred_ = cur->pred_;
+
+        // deallocate memory;
+        list_node_allocator::deallocate(cur);
+      }
+      // throw out;
+      throw e;
+    }
+  }
+  /* end ctor */
+
+  /* dtor */
+  ~list(void) {
+    // destroy data;
+    ::lem::destroy(iterator(head_->next_), iterator(head_));
+    // free memory;
+    for (; head_->pred_ != head_;) {
+      node_pointer cur = head_->pred_;
+
+      cur->pred_->next_ = head_;
+      head_->pred_ = cur->pred_;
+
+      // deallocate memory;
+      list_node_allocator::deallocate(cur);
+    }
+  }
   /* end dtor */
 
-  void push_back(const value_type& value) {
+  /* iterators */
+  iterator begin(void) noexcept {
+    return iterator(head_->next_);
+  }
+  iterator end(void) noexcept {
+    return iterator(head_);
+  }
+  /* edn iterators */
+
+  /* accessors */
+  iterator front(void) noexcept {
+    return *begin();
+  }
+  iterator back(void) noexcept {
+    return *(--end());
+  }
+  /* end accessors */
+
+  /* capacity */
+  bool empty(void) noexcept {
+    return (begin() == end());
+  }
+  size_type size(void) noexcept {
+    return ::lem::distance(begin(), end());
+  }
+  /* end capacity */
+
+  /* modifiers */
+  iterator insert(iterator iter, const value_type& value) {
     // build new node;
     node_pointer newNode = list_node_allocator::allocate();
     ::lem::construct(&(newNode->data_), value);
 
     // insert to list end;
-    newNode->pred_ = head_->pred_;
-    newNode->next_ = head_;
-    newNode->pred_->next_ = newNode;
-    head_->pred_ = newNode;
+    newNode->pred_ = iter->pred_;
+    newNode->next_ = iter;
+    iter->pred_->next_ = newNode;
+    iter->pred_ = newNode;
+
+    return newNode; // build iterator via __list_node;
+  }
+  void push_back(const value_type& value) {
+    insert(end(), value);
 
     return;
   }
+  /* end modifiers */
 };
 } /* end lem */
 #endif
