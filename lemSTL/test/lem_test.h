@@ -18,7 +18,11 @@ class testcase {
     ~testcase(void) { std::cout << "\tLEM_DEBUG: Call dtor testcase. " << std::endl; }
   #endif
 
-  testcase(char const* case_name) : case_name_(case_name) {}
+  testcase(char const* case_name) : case_name_(case_name) {
+    #ifdef LEM_DEBUG
+      ::std::cout << "Testcase " << case_name << " is being built. " << ::std::endl;
+    #endif
+  }
 
   virtual void run_test(void) = 0;
 };
