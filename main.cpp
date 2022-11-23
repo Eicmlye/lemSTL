@@ -165,6 +165,42 @@
     EXPECT_NEQ(*cur, 2);
     EXPECT_EQ(*cur, 3);
   }
+  TEST(int_list_accessor) {
+    lem::list<int> lst = { 1, 2, 3, 4, 5 };
+
+    EXPECT_EQ(lst.front(), 1);
+    EXPECT_EQ(lst.back(), 5);
+  }
+  TEST(int_list_capacity) {
+    lem::list<int> lst = {};
+
+    EXPECT_EQ(lst.size(), 0);
+    EXPECT_EQ(lst.empty(), true);
+
+    lem::list<int> lst2 = { 1, 3, 5, 7 };
+
+    EXPECT_EQ(lst2.size(), 4);
+    EXPECT_EQ(lst2.empty(), false);
+  }
+  TEST(int_list_push_and_pop) {
+    lem::list<int> lst = { 1, 3, 4, 5, 7 };
+    lem::list<int>::iterator iter = lst.begin(); // iter points to element 1;
+
+    lst.push_front(0);
+    EXPECT_EQ_INT_LIST(lst, { 0, 1, 3, 4, 5, 7 });
+    lst.push_back(8);
+    EXPECT_EQ_INT_LIST(lst, { 0, 1, 3, 4, 5, 7, 8 });
+    ++iter;
+    lst.insert(iter, 2);
+    EXPECT_EQ_INT_LIST(lst, { 0, 1, 2, 3, 4, 5, 7, 8 });
+
+    lst.pop_front();
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 3, 4, 5, 7, 8 });
+    lst.pop_back();
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 3, 4, 5, 7 });
+    lst.erase(iter);
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 4, 5, 7 });
+  }
 #endif
 
 int main(void) {

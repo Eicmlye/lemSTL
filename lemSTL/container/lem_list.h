@@ -243,10 +243,10 @@ class list {
   /* edn iterators */
 
   /* accessors */
-  iterator front(void) noexcept {
+  reference_type front(void) noexcept {
     return *begin();
   }
-  iterator back(void) noexcept {
+  reference_type back(void) noexcept {
     return *(--end());
   }
   /* end accessors */
@@ -266,16 +266,52 @@ class list {
     node_pointer newNode = list_node_allocator::allocate();
     ::lem::construct(&(newNode->data_), value);
 
-    // insert to list end;
-    newNode->pred_ = iter->pred_;
-    newNode->next_ = iter;
-    iter->pred_->next_ = newNode;
-    iter->pred_ = newNode;
+    // insert to list;
+    newNode->pred_ = iter.node_->pred_;
+    newNode->next_ = iter.node_;
+    iter.node_->pred_->next_ = newNode;
+    iter.node_->pred_ = newNode;
 
     return newNode; // build iterator via __list_node;
   }
   void push_back(const value_type& value) {
     insert(end(), value);
+
+    return;
+  }
+  void push_front(const value_type& value) {
+    insert(begin(), value);
+
+    return;
+  }
+
+  iterator erase(iterator iter) {
+    // protect list header;
+    if (iter == end()) {
+      throw ::lem::del_header();
+    }
+
+    // pop iter;
+    node_pointer pred = iter.node_->pred_;
+    node_pointer next = iter.node_->next_;
+
+    pred->next_ = next; 
+    next->pred_ = pred;
+
+    // destroy iter;
+    ::lem::destroy(&(iter.node_->data_));
+    // free memory;
+    list_node_allocator::deallocate(iter.node_);
+
+    return next;
+  }
+  void pop_front(void) {
+    erase(begin());
+
+    return;
+  }
+  void pop_back(void) {
+    erase(--end());
 
     return;
   }

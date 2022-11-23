@@ -4,5 +4,6 @@
 #include "exception/lem_exception_alloc.h"
 #include "exception/lem_exception_vector.h"
 #include "exception/lem_exception_extra.h"
+#include "exception/lem_exception_list.h"
 
 #endif

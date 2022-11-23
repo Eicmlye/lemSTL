@@ -10,6 +10,7 @@ namespace lem {
     if (expect != actual) {\
       ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
       ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
+      ::std::cout << ::std::boolalpha;\
       ::std::cout << "\tExpect: " << expect << ", Actual: " << actual << ::std::endl;\
     }\
   } while (0)
@@ -18,6 +19,7 @@ namespace lem {
     if (expect == actual) {\
       ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
       ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
+      ::std::cout << ::std::boolalpha;\
       ::std::cout << "\tExpect: NOT " << expect << ", Actual: " << actual << ::std::endl;\
     }\
   } while (0)
@@ -58,6 +60,7 @@ namespace lem {
         ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
         ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
         ::std::cout << "\tElement [" << iter - actual.begin();\
+        ::std::cout << ::std::boolalpha;\
         ::std::cout << "] Expect: " << *exp_iter << ", Actual: " << *iter << ::std::endl;\
         break;\
       }\
@@ -83,6 +86,7 @@ namespace lem {
         ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
         ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
         ::std::cout << "\tElement [" << count;\
+        ::std::cout << ::std::boolalpha;\
         ::std::cout << "] Expect: " << *exp_iter << ", Actual: " << *iter << ::std::endl;\
         break;\
       }\
