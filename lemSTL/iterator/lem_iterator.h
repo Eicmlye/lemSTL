@@ -101,6 +101,36 @@ distance(InputIterator head, InputIterator tail) {
   return ::lem::__distance(head, tail, ::lem::get_iterator_category(head));
 }
 /* end distance */
+
+/* advance */
+template <typename InputIterator, typename Distance>
+inline void __advance(InputIterator& iter, Distance dist, ::lem::input_iterator_tag) {
+  for (; dist != 0; --dist) {
+    ++iter;
+  }
+}
+template <typename BidirectionalIterator, typename Distance>
+inline void __advance(BidirectionalIterator& iter, Distance dist, ::lem::bidirectional_iterator_tag) {
+  if (dist >= 0) {
+    for (; dist != 0; --dist) {
+      ++iter;
+    }
+  }
+  else {
+    for (; dist != 0; ++dist) {
+      --iter;
+    }
+  }
+}
+template <typename RandomAccessIterator, typename Distance>
+inline void __advance(RandomAccessIterator& iter, Distance dist, ::lem::random_access_iterator_tag) {
+  iter += dist;
+}
+template <typename InputIterator, typename Distance>
+inline void advance(InputIterator& iter, Distance dist = 1) {
+  __advance(iter, dist, ::lem::get_iterator_category(iter));
+}
+/* end advance */
 } /* end lem */
 
 #endif
