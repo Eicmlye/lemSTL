@@ -372,8 +372,8 @@ void* __default_alloc_template<threads, inst>::refill(size_t free_list_node_size
   // EM NOTE: notice that since we are calling refill(),
   // now (*plist)->next_ == nullptr.
   FreeList volatile* plist = free_list + free_list_get_ind(free_list_node_size);
-  *plist = (FreeListNode*)mem_block + free_list_node_size;
-  FreeListNode* cur = (FreeListNode*)(mem_block + free_list_node_size);
+  *plist = (FreeListNode*)(mem_block + free_list_node_size);
+  FreeListNode* cur = *plist;
   FreeListNode* pred = nullptr;
   for (size_t index = 1; index < num_node - 1; ++index) {
     pred = cur;

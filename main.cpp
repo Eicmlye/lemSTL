@@ -6,7 +6,7 @@
 #include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
-  #define TEST_VECTOR_
+//  #define TEST_VECTOR_
   #define TEST_LIST_
 #endif
 
@@ -200,6 +200,53 @@
     EXPECT_EQ_INT_LIST(lst, { 1, 2, 3, 4, 5, 7 });
     lst.erase(iter);
     EXPECT_EQ_INT_LIST(lst, { 1, 2, 4, 5, 7 });
+    EXPECT_ERROR(lst.erase(lst.end()), lem::del_header);
+  }
+  TEST(int_list_clear) {
+    lem::list<int> lst = { 1, 3, 5, 7 };
+
+    lst.clear();
+    EXPECT_EQ(lst.size(), 0);
+    EXPECT_EQ(lst.empty(), true);
+
+    lst.push_back(1);
+    EXPECT_EQ_INT_LIST(lst, { 1 });
+  }
+  TEST(int_list_remove) {
+    lem::list<int> lst = { 1, 3, 5, 7, 9, 1 };
+
+    EXPECT_EQ(lst.remove(1), 2);
+    EXPECT_EQ_INT_LIST(lst, { 3, 5, 7, 9 });
+
+    EXPECT_EQ(lst.remove(9), 1);
+    EXPECT_EQ_INT_LIST(lst, { 3, 5, 7 });
+
+    EXPECT_EQ(lst.remove(5), 1);
+    EXPECT_EQ_INT_LIST(lst, { 3, 7 });
+  }
+  TEST(int_list_unique) {
+    // no-op;
+    lem::list<int> lst = { 1, 2, 3, 4, 5 };
+    EXPECT_EQ(lst.unique(), 0);
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 3, 4, 5 });
+
+    // 1 duplicant, head/mid/tail;
+    lem::list<int> lst1 = { 1, 1, 2, 3, 4, 5 };
+    EXPECT_EQ(lst1.unique(), 1);
+    EXPECT_EQ_INT_LIST(lst1, { 1, 2, 3, 4, 5 });
+
+    lem::list<int> lst2 = { 1, 2, 3, 4, 5, 5 };
+    EXPECT_EQ(lst2.unique(), 1);
+    EXPECT_EQ_INT_LIST(lst2, { 1, 2, 3, 4, 5 });
+
+    lem::list<int> lst3 = { 1, 2, 3, 3, 4, 5 };
+    EXPECT_EQ(lst3.unique(), 1);
+    EXPECT_EQ_INT_LIST(lst3, { 1, 2, 3, 4, 5 });
+
+    // mixed;
+    lem::list<int> lst4 = { 1, 1, 2, 3, 3, 4, 5, 5, 5 };
+    EXPECT_EQ(lst4.unique(), 4);
+    EXPECT_EQ_INT_LIST(lst4, { 1, 2, 3, 4, 5 });
   }
 #endif
 

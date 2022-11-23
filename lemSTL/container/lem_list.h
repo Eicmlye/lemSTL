@@ -221,7 +221,7 @@ class list {
     // destroy data;
     ::lem::destroy(iterator(head_->next_), iterator(head_));
     // free memory;
-    for (; head_->pred_ != head_;) {
+    while (head_->pred_ != head_) {
       node_pointer cur = head_->pred_;
 
       cur->pred_->next_ = head_;
@@ -230,6 +230,9 @@ class list {
       // deallocate memory;
       list_node_allocator::deallocate(cur);
     }
+
+    // deallocate header;
+    list_node_allocator::deallocate(head_);
   }
   /* end dtor */
 
@@ -314,6 +317,63 @@ class list {
     erase(--end());
 
     return;
+  }
+  size_type remove(const value_type& value) {
+    size_type count = 0;
+    iterator iter = begin();
+
+    while (iter != end()) {
+      if (*iter == value) {
+        iter = erase(iter);
+        ++count;
+      }
+      else {
+        ++iter;
+      }
+    }
+
+    return count;
+  }
+
+  void clear(void) {
+    // destroy data;
+    ::lem::destroy(begin(), end());
+
+    // free memory;
+    while (head_->pred_ != head_) {
+      node_pointer cur = head_->pred_;
+
+      cur->pred_->next_ = head_;
+      head_->pred_ = cur->pred_;
+
+      // deallocate memory;
+      list_node_allocator::deallocate(cur);
+    }
+
+    return;
+  }
+
+  size_type unique(void) {
+    if (empty()) {
+      return 0;
+    }
+
+    size_type count = 0;
+    iterator curFirst = begin();
+    iterator mov = ++begin();
+
+    while (mov != end()) {
+      if (*mov == *curFirst) {
+        mov = erase(mov);
+        ++count;
+      }
+      else {
+        curFirst = mov;
+        ++mov;
+      }
+    }
+
+    return count;
   }
   /* end modifiers */
 };
