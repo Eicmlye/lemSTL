@@ -45,14 +45,13 @@ class testManager {
 
   }
   ~testManager(void) {
-    // destroy all testcases, avoid memory leak;
-    for (lem::vector<testcase*>::iterator iter = testcases_.begin(); iter != testcases_.end(); ++iter) {
-      destroy(*iter);
-    }
-    destroy(&testcases_);
     #ifdef LEM_DEBUG
       std::cout << "\tLEM_DEBUG: Call dtor testManager. " << std::endl;
     #endif
+
+    // EM NOTE: you don't need to manually free member testcases_,
+    // testManager dtor will do all the member memory-free work
+    // at the end of this dtor function.
   }
 
   static testManager* getManager(void);
