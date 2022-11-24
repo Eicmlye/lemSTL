@@ -76,19 +76,33 @@ namespace lem {
       ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
       ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
       ::std::cout << "\tExpect: list size " << list_exp.size() << ", Actual: " << actual.size() << ::std::endl;\
+      ::std::cout << "\tActual list: { ";\
+      ::lem::list<int>::iterator mov = actual.begin();\
+      for (; mov != actual.end(); ++mov) {\
+        ::std::cout << *mov << ", ";\
+      }\
+      ::std::cout << "\b\b }" << ::std::endl;\
     }\
-    /* check corresponding elements */\
-    ::std::initializer_list<int>::iterator exp_iter = list_exp.begin();\
-    ::lem::list<int>::iterator iter = actual.begin();\
-    size_t count = 0;\
-    for (; iter != actual.end(); ++iter, ++exp_iter, ++count) {\
-      if ((*iter) != (*exp_iter)) {\
-        ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
-        ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
-        ::std::cout << "\tElement [" << count;\
-        ::std::cout << ::std::boolalpha;\
-        ::std::cout << "] Expect: " << *exp_iter << ", Actual: " << *iter << ::std::endl;\
-        break;\
+    else {\
+      /* check corresponding elements */\
+      ::std::initializer_list<int>::iterator exp_iter = list_exp.begin();\
+      ::lem::list<int>::iterator iter = actual.begin();\
+      size_t count = 0;\
+      for (; iter != actual.end(); ++iter, ++exp_iter, ++count) {\
+        if ((*iter) != (*exp_iter)) {\
+          ::lem::testManager::getManager()->currentTestcase_->case_result_ = false;\
+          ::std::cout << "Failed at Line " << __LINE__ << " of File " << __FILE__ << ::std::endl;\
+          ::std::cout << "\tElement [" << count;\
+          ::std::cout << ::std::boolalpha;\
+          ::std::cout << "] Expect: " << *exp_iter << ", Actual: " << *iter << ::std::endl;\
+          ::std::cout << "\tActual list: { ";\
+          ::lem::list<int>::iterator mov = actual.begin();\
+          for (; mov != actual.end(); ++mov) {\
+            ::std::cout << *mov << ", ";\
+          }\
+          ::std::cout << "\b\b }" << ::std::endl;\
+          break;\
+        }\
       }\
     }\
   } while (0)

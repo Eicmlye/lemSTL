@@ -2,12 +2,16 @@
 
 #include <iostream>
 
-// #define LEM_DEBUG
+//#define LEM_DEBUG
+#define LEM_WARNING
 #include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
-//  #define TEST_VECTOR_
+  #define TEST_VECTOR_
   #define TEST_LIST_
+#else
+  #include "lemSTL/lem_vector"
+  #include "lemSTL/lem_list"
 #endif
 
 #ifdef TEST_VECTOR_
@@ -248,11 +252,80 @@
     EXPECT_EQ(lst4.unique(), 4);
     EXPECT_EQ_INT_LIST(lst4, { 1, 2, 3, 4, 5 });
   }
+  TEST(int_list_splice_1) {
+    lem::list<int> lst = { 1, 2, 3 };
+    lem::list<int> child1 = { 9, 8, 7 };
+    lem::list<int> child2 = { 6, 5, 4 };
+    lem::list<int> child3 = { 13, 12, 11 };
+    lem::list<int>::iterator cur = lst.begin();
+
+    lst.splice(lst.begin(), child1);
+    EXPECT_EQ_INT_LIST(lst, { 9, 8, 7, 1, 2, 3 });
+    // now child1 is empty;
+    lst.splice(lst.begin(), child1);
+    EXPECT_EQ_INT_LIST(lst, { 9, 8, 7, 1, 2, 3 });
+    lst.splice(lst.end(), child2);
+    EXPECT_EQ_INT_LIST(lst, { 9, 8, 7, 1, 2, 3, 6, 5, 4 });
+    lem::advance(cur, 2);
+    lst.splice(cur, child3);
+    EXPECT_EQ_INT_LIST(lst, { 9, 8, 7, 1, 2, 13, 12, 11, 3, 6, 5, 4 });
+  }
+  TEST(int_list_splice_2) {
+    lem::list<int> lst = { 1, 2, 3 };
+    lem::list<int> child1 = { 9, 8, 7 };
+    lem::list<int> child2 = { 6, 5, 4 };
+    lem::list<int> child3 = { 13, 12, 11 };
+    lem::list<int>::iterator cur = lst.begin();
+    lem::list<int>::iterator head = child1.begin();
+    lem::list<int>::iterator tail = child1.end();
+
+    lst.splice(lst.begin(), lst, lst.begin());
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 3 });
+    lst.splice(++lst.begin(), lst, lst.begin());
+    EXPECT_EQ_INT_LIST(lst, { 1, 2, 3 });
+
+    lst.splice(lst.begin(), child1, head);
+    EXPECT_EQ_INT_LIST(lst, { 9, 1, 2, 3 });
+    lst.splice(lst.begin(), child1, --tail);
+    EXPECT_EQ_INT_LIST(lst, { 7, 9, 1, 2, 3 });
+    head = child2.begin();
+    ++head;
+    lst.splice(lst.end(), child2, head);
+    EXPECT_EQ_INT_LIST(lst, { 7, 9, 1, 2, 3, 5 });
+    head = child3.begin();
+    ++head;
+    ++cur;
+    lst.splice(cur, child3, head);
+    EXPECT_EQ_INT_LIST(lst, { 7, 9, 1, 12, 2, 3, 5 });
+  }
+  TEST(int_list_splice_3) {
+    lem::list<int> lst = { 1, 2, 3 };
+    lem::list<int> child1 = { 9, 8, 7 };
+    lem::list<int>::iterator head = child1.begin();
+    lem::list<int>::iterator tail = child1.end();
+
+    lst.splice(lst.begin(), child1, ++head, --tail);
+    EXPECT_EQ_INT_LIST(lst, { 8, 1, 2, 3 });
+  }
+  TEST(int_list_splice_error) {
+    lem::list<int> lst = { 1, 2, 3 };
+    lem::list<int> child1 = { 9, 8, 7 };
+    lem::list<int> child2 = { 6, 5, 4 };
+    lem::list<int> child3 = { 13, 12, 11 };
+    lem::list<int>::iterator cur = lst.begin();
+    lem::list<int>::iterator head = child1.begin();
+    lem::list<int>::iterator tail = child1.end();
+
+    EXPECT_ERROR(lst.splice(cur, lst), lem::self_splice);
+  }
 #endif
 
 int main(void) {
   #ifdef LEM_TEST_
     RUN_ALL_TESTS();
+  #else
+    lem::list<int> lst = { 1, 2, 3 };
+    lem::list<int> lst2 = lst;
   #endif
 
   return 0;

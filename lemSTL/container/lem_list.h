@@ -45,7 +45,6 @@
 // to let the user know this construction failure. 
 
 namespace lem {
-// See declarations at https://en.cppreference.com/w/cpp/container/list;
 template <typename DataType>
 struct __list_node {
   DataType data_;
@@ -71,18 +70,23 @@ struct __list_iterator {
   // ctor;
   __list_iterator(void) : node_(nullptr) {}
   __list_iterator(node_pointer node) : node_(node) {}
-  __list_iterator(iterator const& iter) : node_(iter.node_) {}
+  
+  __list_iterator(iterator const& iter) : node_(iter.node_) {
+    #if defined LEM_DEBUG && 0
+      ::std::cout << "Call list iterator copy ctor. " << ::std::endl;
+    #endif
+  }
 
   // equality;
-  bool operator==(self const& iter) {
+  bool operator==(self const& iter) const {
     return node_ == iter.node_;
   }
-  bool operator!=(self const& iter) {
+  bool operator!=(self const& iter) const {
     return node_ != iter.node_;
   }
 
   // dereference;
-  reference_type operator*(void) {
+  reference_type operator*(void) const {
     return node_->data_;
   }
 
@@ -122,6 +126,7 @@ struct __list_iterator {
 };
 
 /* SGI STL implemented list as a cyclic doubly-linked list with empty header node */
+// See declarations at https://en.cppreference.com/w/cpp/container/list;
 template <typename DataType, typename AllocType = ::lem::alloc>
 class list {
  public:
@@ -159,14 +164,24 @@ class list {
  public:
   /* ctor */
   // default ctor;
+  // ##usage: list<...> lst;
   list(void) {
+    #ifdef LEM_DEBUG
+      ::std::cout << "Call list default ctor. " << ::std::endl;
+    #endif
+
     head_ = list_node_allocator::allocate();
     head_->next_ = head_;
     head_->pred_ = head_;
   }
 
   // ctor;
+  // ##usage: list<...> lst({...});
   list(::std::initializer_list<value_type> init_list) {
+    #ifdef LEM_DEBUG
+      ::std::cout << "Call list init-list ctor. " << ::std::endl;
+    #endif
+
     // set header node;
     head_ = list_node_allocator::allocate();
     head_->next_ = head_;
@@ -214,10 +229,33 @@ class list {
       throw e;
     }
   }
+
+  // copy ctor;
+  // Copy ctor is called when an object is initialized to an existed object of the same type;
+  // Notice that copy ctor is only used for initialization.
+  // ##usage: list<...> lst = ARGUMENT; 
+  //  ARGUMENT is used to construct a temporary object K via ctor list(ARGUMENT),
+  //  and copy ctor is used to copy K to lst.
+  // ##usage: list<...> lst(SOME_LIST);
+  // ##usage: list<...> lst = SOME_LIST;
+  //  Here SOME_LIST will not be considered as ARGUMENT for copy ctor to construct a temp object,
+  //  instead lst is directly constructed by copy ctor which is exactly like vct(SOME_LIST).
+  /* list(list<DataType, AllocType> const&) {} */ // deep copy for specific DataType;
+
+  // assignment ctor;
+  // deep copy for specific DataType;
+  // Notice that assignment ctor is used to change data of initialized objects.
+  // ##usage: lst = SOME_LIST;
+  /* list<DataType, AllocType> operator=(list<DataType, AllocType>) {} */
+
   /* end ctor */
 
   /* dtor */
   ~list(void) {
+    #ifdef LEM_DEBUG
+      ::std::cout << "Call list dtor. " << ::std::endl;
+    #endif
+
     // destroy data;
     ::lem::destroy(iterator(head_->next_), iterator(head_));
     // free memory;
@@ -375,7 +413,175 @@ class list {
 
     return count;
   }
+
+ protected:
+  // transfer [head, tail) to the front of iter.
+  // EM NOTE: if iter.node_ == head.node_ == tail.node_->pred_, the behaviour is undefined.
+  void transfer(iterator const iter, iterator const head, iterator const tail) {
+    //                                        iter
+    //                                         |
+    //                                         v
+    // ----      -------------------      ------------      ----
+    // ...| <--> |iter.node_->pred_| <--> |iter.node_| <--> |...
+    // ----      -------------------      ------------      ----
+    // 
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    // ...| <--> |head.node_->pred_| <--> |head.node_| <--> |...| <--> |tail.node_->pred_| <--> |tail.node_|
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    //                                         ^                                                      ^
+    //                                         |                                                      |
+    //                                        head                                                   tail
+    
+    // deal with iterator predecessors;
+    iter.node_->pred_->next_ = head.node_;
+    tail.node_->pred_->next_ = iter.node_;
+    head.node_->pred_->next_ = tail.node_;
+    //                                        iter
+    //                                         |
+    //                                         v
+    // ----      -------------------      ------------      ----
+    // ...| <--> |iter.node_->pred_| <--  |iter.node_| <--> |...
+    // ----      -------------------      ------------      ----
+    //                            |          ^
+    //                            ---------  |
+    //                                    |  --------------------------------------------
+    //                                    v                                             |
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    // ...| <--> |head.node_->pred_| <--  |head.node_| <--> |...| <--> |tail.node_->pred_| <--  |tail.node_|
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    //                             |           ^                                                ^     ^
+    //                             |           |                                                |     |
+    //                             |          head                                              |    tail
+    //                             --------------------------------------------------------------
+    
+    node_pointer cache = iter.node_->pred_;
+    //                  cache                 iter
+    //                    |                    |
+    //                    v                    v
+    // ----      -------------------      ------------      ----
+    // ...| <--> |iter.node_->pred_| <--  |iter.node_| <--> |...
+    // ----      -------------------      ------------      ----
+    //                            |          ^
+    //                            ---------  |
+    //                                    |  --------------------------------------------
+    //                                    v                                             |
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    // ...| <--> |head.node_->pred_| <--  |head.node_| <--> |...| <--> |tail.node_->pred_| <--  |tail.node_|
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    //                             |           ^                                                ^     ^
+    //                             |           |                                                |     |
+    //                             |          head                                              |    tail
+    //                             --------------------------------------------------------------
+
+    // deal with iterators;
+    iter.node_->pred_ = tail.node_->pred_;
+    tail.node_->pred_ = head.node_->pred_;
+    head.node_->pred_ = cache;
+    //                  cache                 iter
+    //                    |                    |
+    //                    v                    v
+    // ----      -------------------      ------------      ----
+    // ...| <--> |iter.node_->pred_|      |iter.node_| <--> |...
+    // ----      -------------------      ------------      ----
+    //                            ^          ^
+    //                            |          |
+    //                            ---------  --------------------------------------------
+    //                                    |                                             |
+    //                                    v                                             v
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    // ...| <--> |head.node_->pred_|      |head.node_| <--> |...| <--> |tail.node_->pred_|      |tail.node_|
+    // ----      -------------------      ------------      -----      -------------------      ------------
+    //                             ^           ^                                                ^     ^
+    //                             |           |                                                |     |
+    //                             |          head                                              |    tail
+    //                             --------------------------------------------------------------
+
+    return;
+  }
+ public:
+  void splice(iterator const iter, list<DataType, AllocType>& lst) {
+    if (this == &lst) {
+      throw ::lem::self_splice();
+    }
+    if (lst.empty()) {
+      return;
+    }
+
+    transfer(iter, lst.begin(), lst.end());
+
+    return;
+  }
+  void splice(iterator const iter, list<DataType, AllocType>& lst, iterator const head) {
+    #ifdef LEM_WARNING
+      do {
+        iterator mov = lst.begin();
+        bool isIterOfLst = false;
+        for (; mov != lst.end(); ++mov) {
+          if (head == mov) {
+            isIterOfLst = true;
+            break;
+          }
+        }
+
+        if (!isIterOfLst) {
+          throw ::std::out_of_range("Iterator does not point to any element of given list. ");
+        }
+        if (head == lst.end()) {
+          throw ::lem::mov_header();
+        }
+      } while (0);
+    #endif
+
+    iterator tail = head;
+    ++tail;
+
+    if (iter == head || iter == tail) {
+      return;
+      /* when iter == head, transfer(iter, head, tail) will make iter.node_->next_ == iter.node_ */
+    }
+    if (lst.empty()) {
+      return;
+    }
+
+    transfer(iter, head, tail);
+
+    return;
+  }
+  void splice(iterator const iter, list<DataType, AllocType>& lst, iterator const head, iterator const tail) {
+    #ifdef LEM_WARNING
+      if (this == &lst) {
+        iterator mov = head;
+        while (mov != tail) {
+          if (mov == lst.head_) {
+            throw ::lem::mov_header();
+          }
+          if (mov == iter) {
+            throw ::lem::self_splice("Interval self-splicing. ");
+          }
+        }
+      }
+    #endif
+
+    if (head == tail) {
+      return;
+    }
+
+    transfer(iter, head, tail);
+
+    return;
+  }
   /* end modifiers */
 };
+
+/* list __type_traits */
+template <typename DataType, typename AllocType>
+struct __type_traits<list<DataType, AllocType>> {
+  using has_trivial_default_ctor = ::lem::__false_tag;
+  using has_trivial_copy_ctor = ::lem::__false_tag;
+  using has_trivial_assignment_oprtr = ::lem::__false_tag;
+  using has_trivial_dtor = ::lem::__false_tag;
+  using is_POD_type = ::lem::__false_tag;
+};
+/* end __type_traits */
 } /* end lem */
 #endif

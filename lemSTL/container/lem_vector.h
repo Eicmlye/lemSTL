@@ -85,9 +85,11 @@ class vector {
  public:
   /* ctor */
   // default ctor;
+  // ##usage: vector<...> vct;
   vector(void) : mem_head_(nullptr), data_tail_(nullptr), mem_tail_(nullptr) {}
 
   // ctor;
+  // ##usage: vector<...> vct({...});
   vector(::std::initializer_list<DataType> init_list) {
     // allocate memory;
     mem_head_ = data_allocator::allocate(init_list.size());
@@ -130,10 +132,20 @@ class vector {
 
   // copy ctor;
   // Copy ctor is called when an object is initialized to an existed object of the same type;
-  /* vector(const vector<DataType, AllocType>&) {} */ // deep copy for specific DataType;
+  // Notice that copy ctor is only used for initialization.
+  // ##usage: vector<...> vct = ARGUMENT; 
+  //  ARGUMENT is used to construct a temporary object K via ctor vector(ARGUMENT),
+  //  and copy ctor is used to copy K to vct.
+  // ##usage: vector<...> vct(SOME_VECTOR);
+  // ##usage: vector<...> vct = SOME_VECTOR;
+  //  Here SOME_VECTOR will not be considered as ARGUMENT for copy ctor to construct a temp object,
+  //  instead vct is directly constructed by copy ctor which is exactly like vct(SOME_VECTOR).
+  /* vector(vector<DataType, AllocType> const&) {} */ // deep copy for specific DataType;
 
   // assignment ctor;
   // deep copy for specific DataType;
+  // Notice that assignment ctor is used to change data of initialized objects.
+  // ##usage: vct = SOME_VECTOR;
   /* vector<DataType, AllocType> operator=(vector<DataType, AllocType>) {} */
 
   /* end ctor */
