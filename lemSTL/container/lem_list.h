@@ -570,6 +570,52 @@ class list {
 
     return;
   }
+
+  // merge two sorted list;
+  // Lists should already been sorted in ascending order.
+  void merge(list<DataType, AllocType>& other) {
+    if (this == &other) {
+      return;
+    }
+
+    iterator iter = begin();
+    iterator iterEnd = end();
+    iterator jter = other.begin();
+    iterator jterEnd = other.end();
+
+    while (iter != iterEnd && jter != jterEnd) {
+      if (*iter > *jter) {
+        iterator cache = jter;
+        ++jter;
+        transfer(iter, cache, jter);
+      }
+      else {
+        ++iter;
+      }
+    }
+
+    if (jter != jterEnd) {
+      transfer(iter, jter, jterEnd);
+    }
+
+    return;
+  }
+
+  void reverse(void) {
+    if (head_->next_ == head_ || head_->next_->next_ == head_) { // .size() == 0 or 1;
+      return;
+    }
+
+    iterator mov = ++begin();
+    while (mov != end()) {
+      iterator cache = mov++;
+
+      // insert to head;
+      transfer(begin(), cache, mov);
+    }
+
+    return;
+  }
   /* end modifiers */
 };
 

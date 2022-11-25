@@ -318,6 +318,19 @@
 
     EXPECT_ERROR(lst.splice(cur, lst), lem::self_splice);
   }
+  TEST(int_list_merge) {
+    lem::list<int> lst = { 1, 3, 5, 7, 9 };
+    lem::list<int> other = { 0, 1, 2, 4, 5, 8 };
+
+    lst.merge(other);
+    EXPECT_EQ_INT_LIST(lst, { 0, 1, 1, 2, 3, 4, 5, 5, 7, 8, 9 });
+  }
+  TEST(int_list_reverse) {
+    lem::list<int> lst = { 1, 3, 5, 7, 9 };
+
+    lst.reverse();
+    EXPECT_EQ_INT_LIST(lst, { 9, 7, 5, 3, 1 });
+  }
 #endif
 
 int main(void) {

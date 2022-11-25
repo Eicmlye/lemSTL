@@ -200,6 +200,15 @@ inline T const& max(T const& a, T const& b, Comp islt) {
   return (islt(a, b) ? b : a);
 }
 /* end max & min */
+
+/* swap */
+template <typename T>
+inline void swap(T& a, T& b) {
+  T temp = a;
+  a = b;
+  b = temp;
+}
+/* end swap */
 } /* end lem */
 
 #endif /* LEMSTL_LEM_ALGORITHM_H_ */
