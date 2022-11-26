@@ -3,12 +3,13 @@
 #include <iostream>
 
 //#define LEM_DEBUG
-#define LEM_WARNING
+//#define LEM_WARNING
 #include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
   #define TEST_VECTOR_
   #define TEST_LIST_
+  #define TEST_DEQUE_
 #else
   #include "lemSTL/lem_vector"
   #include "lemSTL/lem_list"
@@ -318,6 +319,28 @@
 
     EXPECT_ERROR(lst.splice(cur, lst), lem::self_splice);
   }
+  TEST(int_list_merge) {
+    lem::list<int> lst = { 1, 3, 5, 7, 9 };
+    lem::list<int> other = { 0, 1, 2, 4, 5, 8 };
+
+    lst.merge(other);
+    EXPECT_EQ_INT_LIST(lst, { 0, 1, 1, 2, 3, 4, 5, 5, 7, 8, 9 });
+  }
+  TEST(int_list_reverse) {
+    lem::list<int> lst = { 1, 3, 5, 7, 9 };
+
+    lst.reverse();
+    EXPECT_EQ_INT_LIST(lst, { 9, 7, 5, 3, 1 });
+  }
+  TEST(int_list_sort) {
+    lem::list<int> lst = { 1, 0, -4, 2, -9, 5, 7, 3, -8, -4 };
+
+    lst.sort();
+    EXPECT_EQ_INT_LIST(lst, { -9, -8, -4, -4, 0, 1, 2, 3, 5, 7 });
+  }
+#endif
+#ifdef TEST_DEQUE_
+
 #endif
 
 int main(void) {
