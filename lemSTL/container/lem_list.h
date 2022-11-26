@@ -11,6 +11,7 @@
 #endif
 
 #include <cstddef> // for std::ptrdiff_t;
+#include <cstdlib> // for std::rand();
 #include <initializer_list> // for std::initializer_list
 
 #include "../lem_memory"
@@ -616,7 +617,60 @@ class list {
 
     return;
   }
+
+  void swap(list<DataType, AllocType>& other) {
+    iterator sep = begin();
+    splice(begin(), other);
+    other.splice(other.begin(), *this, sep, end());
+
+    return;
+  }
   /* end modifiers */
+
+  /* sort (impl. merge sort) */
+  // This algorithm is given by Hou Jie in 'The Annotated STL Source'.
+  // See https://blog.csdn.net/Ryansior/article/details/126848942 for details.
+  void sort(void) {
+    if (head_->next_ == head_ || head_->next_->next_ == head_) { // .size() == 0 or 1;
+      return;
+    }
+
+    list<DataType, AllocType> cache;
+    list<DataType, AllocType> sorted_section[64]; // max element num 2 ^ 64 - 1;
+    list<DataType, AllocType>* section_tail = sorted_section;
+
+    while (!empty()) {
+      // pop the first node to cache;
+      cache.splice(cache.begin(), *this, begin());
+
+      // merge all the way through the lists in sorted_section until meeting empty list;
+      // Using sorted_section.at(index).empty() requires typename at the front,
+      // which is wierd to put in the while-condition.
+      list<DataType, AllocType>* section = sorted_section;
+      while (section < section_tail && !section->empty()) {
+        section->merge(cache);
+        cache.swap(*(section++));
+      }
+
+      // merging done, send sorted cache to sorted_section;
+      cache.swap(*section);
+      if (section == section_tail) {
+        ++section_tail;
+      }
+      if (section_tail - sorted_section >= 64) {
+        throw ::std::out_of_range("The list is too large (>= 2^64 elements) to be sorted. ");
+      }
+    }
+
+    // all the section merging done, now merge all sorted sections;
+    for (list<DataType, AllocType>* section = sorted_section + 1; section < section_tail; ++section) {
+      section->merge(*(section - 1));
+    }
+    swap(*(section_tail - 1));
+
+    return;
+  }
+  /* end sort */
 };
 
 /* list __type_traits */
