@@ -11,7 +11,6 @@
 #endif
 
 #include <cstddef> // for std::ptrdiff_t;
-#include <cstdlib> // for std::rand();
 #include <initializer_list> // for std::initializer_list
 
 #include "../lem_memory"
@@ -61,9 +60,9 @@ struct __list_iterator {
   using pointer_type          = PointerType;
   using reference_type        = ReferenceType;
 
-  using self                  = __list_iterator<value_type, pointer_type, reference_type>;
-  using iterator              = __list_iterator<value_type, value_type*, value_type&>;
-  using node_pointer          = __list_node<value_type>*;
+  using self                  = __list_iterator<DataType, PointerType, ReferenceType>;
+  using iterator              = __list_iterator<DataType, DataType*, DataType&>;
+  using node_pointer          = __list_node<DataType>*;
 
   // data;
   node_pointer node_;
@@ -74,7 +73,7 @@ struct __list_iterator {
   
   __list_iterator(iterator const& iter) : node_(iter.node_) {
     #if defined LEM_DEBUG && 0
-      ::std::cout << "Call list iterator copy ctor. " << ::std::endl;
+      cout << "Call list iterator copy ctor. " << endl;
     #endif
   }
 
@@ -92,7 +91,7 @@ struct __list_iterator {
   }
 
   // member access;
-  // iter-> is equivalent to (*iter)., which allows you add member directly after the arrow;
+  // iter-> is equivalent to (*iter)., which allows you to add member directly after the arrow;
   // operator-> must return an object with operator-> defined (native pointers are allowed); 
   // See https://stackoverflow.com/questions/8777845 for this special semantics;
   pointer_type operator->(void) const {
@@ -140,9 +139,9 @@ class list {
   // data type;
   using size_type           = size_t;
   using value_type          = DataType;
-  using difference_type     = ptrdiff_t;
-  using pointer_type        = DataType*;
-  using reference_type      = DataType&;
+  using diff_type           = ptrdiff_t;
+  using ptr_type            = DataType*;
+  using ref_type            = DataType&;
   using node_type           = ::lem::__list_node<value_type>;
   using node_pointer        = ::lem::__list_node<value_type>*;
 
@@ -168,7 +167,7 @@ class list {
   // ##usage: list<...> lst;
   list(void) {
     #ifdef LEM_DEBUG
-      ::std::cout << "Call list default ctor. " << ::std::endl;
+      cout << "Call list default ctor. " << endl;
     #endif
 
     head_ = list_node_allocator::allocate();
@@ -180,7 +179,7 @@ class list {
   // ##usage: list<...> lst({...});
   list(::std::initializer_list<value_type> init_list) {
     #ifdef LEM_DEBUG
-      ::std::cout << "Call list init-list ctor. " << ::std::endl;
+      cout << "Call list init-list ctor. " << endl;
     #endif
 
     // set header node;
@@ -254,7 +253,7 @@ class list {
   /* dtor */
   ~list(void) {
     #ifdef LEM_DEBUG
-      ::std::cout << "Call list dtor. " << ::std::endl;
+      cout << "Call list dtor. " << endl;
     #endif
 
     // destroy data;
@@ -285,10 +284,10 @@ class list {
   /* edn iterators */
 
   /* accessors */
-  reference_type front(void) noexcept {
+  ref_type front(void) noexcept {
     return *begin();
   }
-  reference_type back(void) noexcept {
+  ref_type back(void) noexcept {
     return *(--end());
   }
   /* end accessors */
