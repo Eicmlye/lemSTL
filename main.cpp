@@ -340,7 +340,7 @@
   }
 #endif
 #ifdef TEST_DEQUE_
-
+  #include "lemSTL/lem_deque"
 #endif
 
 int main(void) {

@@ -1,6 +1,6 @@
-// 
-#ifndef LEMSTL_VECTOR_
-#define LEMSTL_VECTOR_
+//  lem vector;
+#ifndef LEMSTL_LEM_VECTOR_
+#define LEMSTL_LEM_VECTOR_
 
 #include "algorithm/lem_algobase.h"
 #include "container/lem_vector.h"

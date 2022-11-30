@@ -60,9 +60,9 @@ class vector {
   // Data type;
   using size_type         = size_t;
   using value_type        = DataType;
-  using difference_type   = ptrdiff_t;
-  using pointer_type      = DataType*;
-  using reference_type    = DataType&;
+  using diff_type         = ptrdiff_t;
+  using ptr_type          = DataType*;
+  using ref_type          = DataType&;
 
  protected:
   // memory allocation;
@@ -163,42 +163,41 @@ class vector {
   /* end dtor */
 
   /* iterators */
-  iterator begin(void) noexcept {
+  iterator begin(void) const noexcept {
     return mem_head_;
   }
-  iterator end(void) noexcept {
+  iterator end(void) const noexcept {
     return data_tail_;
   }
   /* end iterators */
 
   /* accessors */
-  reference_type at(size_type ind) {
+  ref_type at(size_type ind) const {
     if (ind >= size()) {
       throw std::out_of_range("Invalid vector subscript. ");
     }
 
     return *(begin() + ind);
   }
-  reference_type operator[](size_type ind) noexcept {
+  ref_type operator[](size_type ind) const noexcept {
     return *(begin() + ind);
   }
-  reference_type front(void)  noexcept {
+  ref_type front(void) const noexcept {
     return *(begin());
   }
-  reference_type back(void) noexcept {
+  ref_type back(void) const noexcept {
     return *(end() - 1);
   }
   /* end accessors */
 
   /* capacity functions */
-  bool empty(void) noexcept {
+  bool empty(void) const noexcept {
     return begin() == end();
   }
-  size_type size(void) noexcept {
-    return (size_type)(end() - begin());
-//    return (size_type)::lem::distance(begin(), end());
+  size_type size(void) const noexcept {
+    return (size_type)::lem::distance(begin(), end());
   }
-  size_type capacity(void) noexcept {
+  size_type capacity(void) const noexcept {
     return (size_type)(mem_tail_ - begin());
   }
   // If req <= capacity, reserve() does nothing,

@@ -1,0 +1,10 @@
+// lem list;
+#ifndef LEMSTL_LEM_DEQUE_
+#define LEMSTL_LEM_DEQUE_
+
+#include "algorithm/lem_algobase.h"
+#include "container/lem_deque.h"
+
+#include "lem_memory"
+
+#endif
