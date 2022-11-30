@@ -128,6 +128,12 @@ struct __deque_iterator {
     return;
   }
  public:
+  /* EM NOTE */
+  // The iterator itself does not care about
+  // whether it has gone out of range of the object.
+  // The range check and memory expansion
+  // is left to the corresponding object to fulfill.
+
   // incre;
   self& operator++(void) {
     ++cur_;
@@ -166,16 +172,54 @@ struct __deque_iterator {
 
   // random access;
   self& operator+=(difference_type n) {
+    difference_type offset = n + (cur_ - head_);
 
+    if (offset >= 0 && offset < difference_type(buffer_size())) {
+      // The iterator stays in the same block after movement.
+      cur_ += n;
+    }
+    else { // The iterator moves to a new block;
+      // Notice: one should try to avoid using negative numbers as dividend,
+      // because different languages may use different rules for rounding.
+      difference_type node_offset = offset > 0 ?\
+        offset / difference_type(buffer_size()) :\
+        -((-offset) / difference_type(buffer_size()) + 1);
+
+      // move map_node_;
+      __set_node(map_node_ + node_offset);
+      // move cur_;
+      cur_ = head_ + (-offset) % difference_type(buffer_size());
+    }
+
+    return *this;
   }
   self& operator-=(difference_type n) {
-
+    return operator+=(-n);
   }
   self operator+(difference_type n) const {
+    self cache = *this;
 
+    return cache += n;
   }
   self operator-(difference_type n) const {
+    self cache = *this;
 
+    return cache -= n;
+  }
+
+  reference_type operator[](difference_type n) const {
+    return *(*this + n);
+  }
+
+  // comparison operator;
+  bool operator==(self const& other) const { // value equivalence;
+    return cur_ == other.cur_;
+  }
+  bool operator!=(self const& other) const { // value equivalence;
+    return cur_ != other.cur_;
+  }
+  bool operator<(self const& other) const { // iterator index comparison;
+    return (map_node_ == other.map_node_) ? (cur_ < other.cur_) : (map_node_ < other.map_node_);
   }
 };
 
@@ -186,15 +230,12 @@ class deque {
   // The essence of SGI deque is indirect addressing.
   // The central manager is responsible for an array of pointers
   // to allocated memory blocks (called buffers) in which the data are actually stored.
-  // 
-  // 
-  // 
 
  public:
   using allocater_type      = AllocType;
 
-  using iterator            = __deque_iterator<DataType, DataType*, DataType&>;
-  using reverse_iterator    = __deque_iterator<DataType, DataType*, DataType&>;
+  using iterator            = __deque_iterator<DataType, DataType*, DataType&, BufSiz>;
+  using reverse_iterator    = __deque_iterator<DataType, DataType*, DataType&, BufSiz>;
 
   using size_type           = size_t;
   using value_type          = DataType;

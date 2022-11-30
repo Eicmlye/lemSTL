@@ -275,28 +275,28 @@ class list {
   /* end dtor */
 
   /* iterators */
-  iterator begin(void) noexcept {
+  iterator begin(void) const noexcept {
     return iterator(head_->next_);
   }
-  iterator end(void) noexcept {
+  iterator end(void) const noexcept {
     return iterator(head_);
   }
   /* edn iterators */
 
   /* accessors */
-  ref_type front(void) noexcept {
+  ref_type front(void) const noexcept {
     return *begin();
   }
-  ref_type back(void) noexcept {
+  ref_type back(void) const noexcept {
     return *(--end());
   }
   /* end accessors */
 
   /* capacity */
-  bool empty(void) noexcept {
+  bool empty(void) const noexcept {
     return (begin() == end());
   }
-  size_type size(void) noexcept {
+  size_type size(void) const noexcept {
     return ::lem::distance(begin(), end());
   }
   /* end capacity */
