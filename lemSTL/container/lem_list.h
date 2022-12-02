@@ -69,7 +69,7 @@ struct __list_iterator {
 
   // ctor;
   __list_iterator(void) : node_(nullptr) {}
-  __list_iterator(node_pointer node) : node_(node) {}
+  explicit __list_iterator(node_pointer node) : node_(node) {}
   
   __list_iterator(iterator const& iter) : node_(iter.node_) {
     #if defined LEM_DEBUG && 0
@@ -313,7 +313,7 @@ class list {
     iter.node_->pred_->next_ = newNode;
     iter.node_->pred_ = newNode;
 
-    return newNode; // build iterator via __list_node;
+    return iterator(newNode); // build iterator via __list_node;
   }
   void push_back(const value_type& value) {
     insert(end(), value);
@@ -344,7 +344,7 @@ class list {
     // free memory;
     list_node_allocator::deallocate(iter.node_);
 
-    return next;
+    return iterator(next);
   }
   void pop_front(void) {
     erase(begin());

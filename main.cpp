@@ -7,8 +7,8 @@
 #include "lemSTL/lem_test"
 
 #ifdef LEM_TEST_
-  #define TEST_VECTOR_
-  #define TEST_LIST_
+//  #define TEST_VECTOR_
+//  #define TEST_LIST_
   #define TEST_DEQUE_
 #else
   #include "lemSTL/lem_vector"
@@ -341,6 +341,19 @@
 #endif
 #ifdef TEST_DEQUE_
   #include "lemSTL/lem_deque"
+
+  TEST(int_deque_ctor) {
+    lem::deque<int> dq = { 1, 2 };
+
+    EXPECT_EQ(dq.at(0), 1);
+    EXPECT_EQ(dq.at(1), 2);
+
+    lem::deque<int> dr(3, 3);
+
+    EXPECT_EQ(dr.at(0), 3);
+    EXPECT_EQ(dr.at(1), 3);
+    EXPECT_EQ(dr.at(2), 3);
+  }
 #endif
 
 int main(void) {
