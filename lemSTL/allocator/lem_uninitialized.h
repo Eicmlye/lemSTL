@@ -11,11 +11,11 @@
 namespace lem {
 /* uninitialized_fill() */
 // fill elem to uninitialized allocated memory;
-template <typename ForwardIterator, typename DataType, typename ValueType>
+template <typename ForwardIterator, typename DataType>
 inline void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, DataType const& elem, ::lem::__true_tag) {
   ::lem::fill(head, tail, elem);
 }
-template <typename ForwardIterator, typename DataType, typename ValueType>
+template <typename ForwardIterator, typename DataType>
 void __uninitialized_fill_aux(ForwardIterator head, ForwardIterator tail, DataType const& elem, ::lem::__false_tag) {
   ForwardIterator cur = head;
   try {
